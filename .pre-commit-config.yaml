@@ -1,0 +1,51 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: debug-statements
+    -   id: name-tests-test
+    -   id: requirements-txt-fixer
+-   repo: https://github.com/asottile/reorder-python-imports
+    rev: v3.17.0
+    hooks:
+    -   id: reorder-python-imports
+        args: [--py310-plus, --add-import, 'from __future__ import annotations']
+-   repo: https://github.com/asottile/add-trailing-comma
+    rev: v4.0.0
+    hooks:
+    -   id: add-trailing-comma
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v3.21.2
+    hooks:
+    -   id: pyupgrade
+        args: [--py310-plus]
+-   repo: https://github.com/hhatto/autopep8
+    rev: v2.3.2
+    hooks:
+    -   id: autopep8
+-   repo: https://github.com/PyCQA/flake8
+    rev: 7.3.0
+    hooks:
+    -   id: flake8
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v2.3.0
+    hooks:
+    -   id: mypy
+        additional_dependencies: [types-PyYAML]
+-   repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+    -   id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [--strict]
+-   repo: local
+    hooks:
+    -   id: check-no-chinese
+        name: check-no-chinese
+        description: Fail if any checked file contains Chinese characters.
+        entry: python scripts/check_no_chinese.py
+        language: system
+        types: [text]
