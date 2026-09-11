@@ -1,0 +1,8 @@
+- id: check-spdx-header
+  name: check-spdx-header
+  description: Ensure spec files start with the required SPDX copyright and license header.
+  entry: check-spdx-header
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
