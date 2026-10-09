@@ -49,6 +49,12 @@ def _header_block(lines: list[str]) -> tuple[list[str], str | None]:
     while i < len(lines) and lines[i].lstrip().startswith('#'):
         block.append(lines[i].strip())
         i += 1
+
+    # Strip trailing blank "#" lines (issue #3) — they are noise after
+    # the SPDX header and should not trigger "license must be last" errors.
+    while block and _RE_BLANK_COMMENT.match(block[-1]):
+        block.pop()
+
     return block, None
 
 

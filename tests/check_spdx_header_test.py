@@ -8,41 +8,15 @@ import pytest
 from openruyi_precommit_hooks.check_spdx_header import _check_spdx_header
 from openruyi_precommit_hooks.check_spdx_header import main
 
-ISCAS = 'Institute of Software, Chinese Academy of Sciences (ISCAS)'
-RUYI = 'openRuyi Project Contributors'
+VALID_SPEC = """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
 
-DEFAULT_ISCAS = f'# SPDX-FileCopyrightText: (C) 2026 {ISCAS}'
-DEFAULT_RUYI = f'# SPDX-FileCopyrightText: (C) 2026 {RUYI}'
-LICENSE_MULAN = '# SPDX-License-Identifier: MulanPSL-2.0'
-SPEC_BODY = 'Name:           foo\nVersion:        1.0\n'
-
-
-def _copyright(owner: str, years: str = '2026') -> str:
-    """Build an SPDX-FileCopyrightText line for the given owner."""
-    return f'# SPDX-FileCopyrightText: (C) {years} {owner}'
-
-
-def _header(
-    *,
-    iscas: str | None = DEFAULT_ISCAS,
-    ruyi: str | None = DEFAULT_RUYI,
-    contributors: list[str] | None = None,
-    n_blank: int = 1,
-    license_line: str | None = LICENSE_MULAN,
-    body: str = SPEC_BODY,
-) -> str:
-    """Assemble a spec file from the given header pieces."""
-    parts: list[str] = []
-    if iscas is not None:
-        parts.append(iscas)
-    if ruyi is not None:
-        parts.append(ruyi)
-    if contributors:
-        parts.extend(contributors)
-    parts.extend(['#'] * n_blank)
-    if license_line is not None:
-        parts.append(license_line)
-    return '\n'.join(parts) + '\n\n' + body
+Name:           foo
+Version:        1.0
+"""
 
 
 def _write(tmp_path: Path, name: str, content: str) -> str:
@@ -55,39 +29,93 @@ def _write(tmp_path: Path, name: str, content: str) -> str:
     ('content', 'filename'),
     [
         pytest.param(
-            _header(
-                contributors=[
-                    '# SPDX-FileContributor: Your Name <your.email@example.com>',
-                ],
-            ),
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# SPDX-FileContributor: Your Name <your.email@example.com>
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             'good1.spec',
             id='with-contributor',
         ),
         pytest.param(
-            _header(
-                contributors=[
-                    '# SPDX-FileContributor: Your Name <your.email@example.com>',
-                    '# SPDX-FileContributor: Another Dev <another@example.com>',
-                ],
-            ),
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# SPDX-FileContributor: Your Name <your.email@example.com>
+# SPDX-FileContributor: Another Dev <another@example.com>
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             'good4.spec',
             id='with-multiple-contributors',
         ),
         pytest.param(
-            _header(
-                iscas=_copyright(ISCAS, '2025, 2026'),
-                ruyi=_copyright(RUYI, '2025, 2026'),
-            ),
+            """\
+# SPDX-FileCopyrightText: (C) 2025, 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2025, 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             'good2.spec',
             id='without-contributor-multi-year',
         ),
         pytest.param(
-            _header(
-                iscas=_copyright(ISCAS, '2025-2026'),
-                ruyi=_copyright(RUYI, '2025-2026'),
-            ),
+            """\
+# SPDX-FileCopyrightText: (C) 2025-2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2025-2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             'good3.spec',
             id='year-range',
+        ),
+        pytest.param(
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# SPDX-FileContributor: user1 <user1@example.com>
+# SPDX-FileContributor: user2 <user2@example.com>
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+#
+
+Name:           foo
+Version:        1.0
+""",
+            'good5.spec',
+            id='trailing-blank-hash',
+        ),
+        pytest.param(
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# SPDX-FileContributor: user1 <user1@example.com>
+# SPDX-FileContributor: user2 <user2@example.com>
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+#
+#
+#
+
+Name:           foo
+Version:        1.0
+""",
+            'good6.spec',
+            id='multiple-trailing-blank-hash',
         ),
     ],
 )
@@ -97,35 +125,115 @@ def test_ok_header(tmp_path: Path, content: str, filename: str) -> None:
 
 
 @pytest.mark.parametrize(
-    ('content', 'expected_substrings'),
+    ('content', 'expected'),
     [
         pytest.param(
-            _header(iscas=None),
+            # missing ISCAS copyright line
+            """\
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             ['missing required header line', 'Institute of Software'],
             id='missing-iscas',
         ),
         pytest.param(
-            _header(ruyi=None),
+            # missing openRuyi copyright line
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             ['missing required header line', 'openRuyi Project Contributors'],
             id='missing-ruyi',
         ),
         pytest.param(
-            _header(license_line='# SPDX-License-Identifier: Apache-2.0'),
-            ['must be the default license "MulanPSL-2.0"', 'found "Apache-2.0"'],
+            # missing SPDX-License-Identifier line, and nothing else is
+            # wrong, so the diagnostic list must match exactly
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+
+Name:           foo
+Version:        1.0
+""",
+            'missing required header line "# SPDX-License-Identifier: MulanPSL-2.0"',
+            id='missing-license',
+        ),
+        pytest.param(
+            # wrong license
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+Name:           foo
+Version:        1.0
+""",
+            [
+                'must be the default license "MulanPSL-2.0"',
+                'found "Apache-2.0"',
+                # the line exists, so it must not be reported missing too
+                '!missing required header line',
+            ],
             id='wrong-license-with-blank-separator',
         ),
         pytest.param(
-            _header(n_blank=0),
+            # wrong license value; exact list, so a spurious extra
+            # diagnostic (e.g. "missing required header line") also fails
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MIT
+
+Name:           foo
+Version:        1.0
+""",
+            'SPDX-License-Identifier must be the default license "MulanPSL-2.0" (found "MIT")',
+            id='wrong-license',
+        ),
+        pytest.param(
+            # no blank "#" line between copyright and license
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             ['missing required blank "#" comment line'],
             id='missing-blank',
         ),
         pytest.param(
-            _header(n_blank=2),
+            # two blank "#" lines
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             ['there must be exactly one blank "#" comment line'],
             id='too-many-blank',
         ),
         pytest.param(
-            'Name:           foo\nVersion:        1.0\n',
+            """\
+Name:           foo
+Version:        1.0
+""",
             ['file does not start with a comment'],
             id='no-comments-at-start',
         ),
@@ -135,25 +243,46 @@ def test_ok_header(tmp_path: Path, content: str, filename: str) -> None:
             id='empty-file',
         ),
         pytest.param(
-            '# generated by openruyi-tooling\n' + _header(),
-            ['file must start with SPDX declarations', '# generated by openruyi-tooling'],
+            # a non-SPDX leading comment is the only problem, so its
+            # diagnostic must match exactly and must not be re-wrapped as
+            # a malformed header line
+            """\
+# generated by openruyi-tooling
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
+            'file must start with SPDX declarations, found "# generated by openruyi-tooling"',
             id='plain-comment-before-spdx-block',
         ),
         pytest.param(
-            '\n' + _header(),
+            """
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             ['file must not start with a blank line'],
             id='leading-blank-line',
         ),
         pytest.param(
-            '# SPDX-FileCopyrightText: (C) 2026 Institute of Software, '
-            'Chinese Academy of Sciences (ISCAS)\n'
-            '# generated by openruyi-tooling\n'
-            '# SPDX-FileCopyrightText: (C) 2026 openRuyi Project '
-            'Contributors\n'
-            '#\n'
-            '# SPDX-License-Identifier: MulanPSL-2.0\n'
-            '\n'
-            'Name:           foo\nVersion:        1.0\n',
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# generated by openruyi-tooling
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             [
                 'header may only contain SPDX declarations',
                 '# generated by openruyi-tooling',
@@ -161,15 +290,16 @@ def test_ok_header(tmp_path: Path, content: str, filename: str) -> None:
             id='non-spdx-comment-in-block',
         ),
         pytest.param(
-            '# SPDX-FileCopyrightText: (C) 2026 Institute of Software, '
-            'Chinese Academy of Sciences (ISCAS)\n'
-            '# SPDX-FileCopyrightText: (C) 2026 openRuyi Project '
-            'Contributors\n'
-            '# some unrelated comment\n'
-            '#\n'
-            '# SPDX-License-Identifier: MulanPSL-2.0\n'
-            '\n'
-            'Name:           foo\nVersion:        1.0\n',
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# some unrelated comment
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             [
                 'header may only contain SPDX declarations',
                 '# some unrelated comment',
@@ -177,104 +307,134 @@ def test_ok_header(tmp_path: Path, content: str, filename: str) -> None:
             id='non-spdx-comment-between-copyright-and-license',
         ),
         pytest.param(
-            DEFAULT_ISCAS + '\n' + DEFAULT_ISCAS + '\n' + DEFAULT_RUYI +
-            '\n#\n' + LICENSE_MULAN + '\n\n' + SPEC_BODY,
+            # duplicate ISCAS copyright line
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             ['duplicate ISCAS copyright line'],
             id='duplicate-iscas-copyright',
         ),
         pytest.param(
-            DEFAULT_ISCAS + '\n' + DEFAULT_RUYI + '\n' + DEFAULT_RUYI +
-            '\n#\n' + LICENSE_MULAN + '\n\n' + SPEC_BODY,
+            # duplicate openRuyi copyright line
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             ['duplicate openRuyi copyright line'],
             id='duplicate-ruyi-copyright',
         ),
         pytest.param(
-            DEFAULT_ISCAS + '\n' + DEFAULT_RUYI + '\n#\n' +
-            LICENSE_MULAN + '\n' + LICENSE_MULAN + '\n\n' + SPEC_BODY,
+            # duplicate SPDX-License-Identifier line
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             ['duplicate SPDX-License-Identifier line'],
             id='duplicate-license-line',
         ),
         pytest.param(
-            '# SPDX-FileContributor: Your Name <your.email@example.com>\n' +
-            DEFAULT_ISCAS + '\n' + DEFAULT_RUYI + '\n#\n' +
-            LICENSE_MULAN + '\n\n' + SPEC_BODY,
+            # contributor before copyright
+            """\
+# SPDX-FileContributor: Your Name <your.email@example.com>
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             ['header lines are out of order'],
             id='contributor-before-copyright',
         ),
         pytest.param(
-            DEFAULT_ISCAS + '\n' +
-            '# SPDX-FileContributor: Your Name <your.email@example.com>\n' +
-            DEFAULT_RUYI + '\n#\n' + LICENSE_MULAN + '\n\n' + SPEC_BODY,
+            # contributor between the two copyright lines
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileContributor: Your Name <your.email@example.com>
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             ['header lines are out of order'],
             id='contributor-between-copyrights',
         ),
         pytest.param(
-            DEFAULT_ISCAS + '\n' + DEFAULT_RUYI + '\n#\n' +
-            '# SPDX-FileContributor: Your Name <your.email@example.com>\n' +
-            LICENSE_MULAN + '\n\n' + SPEC_BODY,
+            # contributor between the blank line and the license
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-FileContributor: Your Name <your.email@example.com>
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
             ['header lines are out of order'],
             id='contributor-between-blank-and-license',
         ),
         pytest.param(
-            DEFAULT_ISCAS + '\n' + DEFAULT_RUYI + '\n#\n' +
-            LICENSE_MULAN + '\n' +
-            '# SPDX-FileContributor: Your Name <your.email@example.com>\n' +
-            '\n' + SPEC_BODY,
+            # contributor after the license
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+# SPDX-FileContributor: Your Name <your.email@example.com>
+
+Name:           foo
+Version:        1.0
+""",
             ['header lines are out of order'],
             id='contributor-after-license',
         ),
     ],
 )
 def test_bad_header(
-    tmp_path: Path, content: str, expected_substrings: list[str],
+    tmp_path: Path, content: str, expected: str | list[str],
 ) -> None:
-    errors = _check_spdx_header(_write(tmp_path, 'bad.spec', content))
-    assert errors != []
-    joined = '\n'.join(errors)
-    for expected in expected_substrings:
-        assert expected in joined
+    """Check that bad headers produce the expected diagnostics.
 
-
-def test_leading_plain_comment_error_is_exact(
-    tmp_path: Path,
-) -> None:
-    """A non-SPDX leading comment must yield the exact diagnostic.
-
-    The message must be returned as an error, not parsed as header
-    content, so it must not be re-wrapped as a malformed header line.
+    ``expected`` is either the single message the file must produce
+    (compared against the full list, so any extra or missing diagnostic
+    fails), or a list of substrings to assert against the joined error
+    output; an entry prefixed with ``!`` must NOT appear.
     """
-    content = '# generated by openruyi-tooling\n' + _header()
     path = _write(tmp_path, 'bad.spec', content)
     errors = _check_spdx_header(path)
-    assert errors == [
-        f'{path}: file must start with SPDX declarations, '
-        'found "# generated by openruyi-tooling"',
-    ]
-
-
-def test_missing_license_identifier(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str],
-) -> None:
-    content = _header(license_line=None)
-    retv = main([_write(tmp_path, 'bad3.spec', content)])
-    captured = capsys.readouterr()
-    assert retv == 1
-    assert 'missing required header line' in captured.out
-    assert 'SPDX-License-Identifier: MulanPSL-2.0' in captured.out
-
-
-def test_wrong_license_identifier(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str],
-) -> None:
-    content = _header(license_line='# SPDX-License-Identifier: MIT')
-    retv = main([_write(tmp_path, 'bad4.spec', content)])
-    captured = capsys.readouterr()
-    assert retv == 1
-    # The license line exists but is not the default license; the message
-    # must not claim the line is missing.
-    assert 'missing required header line' not in captured.out
-    assert 'must be the default license "MulanPSL-2.0"' in captured.out
-    assert 'found "MIT"' in captured.out
+    if isinstance(expected, str):
+        assert errors == [f'{path}: {expected}']
+        return
+    assert errors != []
+    joined = '\n'.join(errors)
+    for item in expected:
+        if item.startswith('!'):
+            assert item[1:] not in joined
+        else:
+            assert item in joined
 
 
 def test_main_exit_code_and_output(
@@ -282,9 +442,23 @@ def test_main_exit_code_and_output(
 ) -> None:
     """main() should return non-zero and print every error for bad files."""
     paths = [
-        _write(tmp_path, 'ok.spec', _header()),
-        _write(tmp_path, 'bad1.spec', _header(iscas=None)),
-        _write(tmp_path, 'bad2.spec', _header(ruyi=None)),
+        _write(tmp_path, 'ok.spec', VALID_SPEC),
+        _write(
+            tmp_path, 'bad1.spec',
+            VALID_SPEC.replace(
+                '# SPDX-FileCopyrightText: (C) 2026 Institute of Software, '
+                'Chinese Academy of Sciences (ISCAS)\n',
+                '',
+            ),
+        ),
+        _write(
+            tmp_path, 'bad2.spec',
+            VALID_SPEC.replace(
+                '# SPDX-FileCopyrightText: (C) 2026 openRuyi Project '
+                'Contributors\n',
+                '',
+            ),
+        ),
     ]
     retv = main(paths)
     captured = capsys.readouterr()
@@ -302,7 +476,7 @@ def test_main_valid_spec_returns_zero_no_output(
     tmp_path: Path, capsys: pytest.CaptureFixture[str],
 ) -> None:
     """main() should return 0 and print nothing for a valid spec file."""
-    content = _header()
+    content = VALID_SPEC
     retv = main([_write(tmp_path, 'ok.spec', content)])
     captured = capsys.readouterr()
     assert retv == 0

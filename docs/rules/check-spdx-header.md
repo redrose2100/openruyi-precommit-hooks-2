@@ -70,7 +70,7 @@ all files pass.
 ```spec
 # SPDX-FileCopyrightText: (C) 2025, 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025, 2026 openRuyi Project Contributors
-# SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
+# SPDX-FileContributor: user1 <user1@example.com>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
