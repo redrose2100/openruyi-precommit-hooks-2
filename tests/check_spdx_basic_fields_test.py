@@ -1,6 +1,5 @@
 # flake8: noqa: E501  -- spec file contents are reproduced verbatim
 """Tests for check_basic_fields hook."""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -84,7 +83,8 @@ def test_missing_license_field(tmp_path: Path) -> None:
 
 def test_missing_description_section(tmp_path: Path) -> None:
     spec = MINIMAL_SPEC.replace(
-        '%description\nA test package for unit tests.\n\n', '')
+        '%description\nA test package for unit tests.\n\n', '',
+    )
     errors = _check_basic_fields(_write(tmp_path, 'bad.spec', spec))
     assert any('missing required section "%description"' in e for e in errors)
 
@@ -103,8 +103,8 @@ def test_missing_changelog_section(tmp_path: Path) -> None:
 
 def test_changelog_without_autochangelog_is_ok(tmp_path: Path) -> None:
     """%changelog with hand-written content (without %autochangelog) is ok.
-    The '基础字段与段落' section only requires %changelog to be present,
-    not its content format."""
+    The "Basic Fields and Sections" rule only requires %changelog to be
+    present, not its content format."""
     spec = MINIMAL_SPEC.replace(
         '%changelog\n%autochangelog\n',
         '%changelog\n* Mon Sep 15 2025 Developer <dev@example.com> - 1.0-1\n- First release\n\n',
@@ -453,8 +453,8 @@ Test package.
     # between their "section" boundaries (because %ifarch is inline).
     # This is an acceptable detection for now.
     assert all(
-        'missing required' not in e
-        and 'field order' not in e
+        'missing required' not in e and
+        'field order' not in e
         for e in errors
     )
 

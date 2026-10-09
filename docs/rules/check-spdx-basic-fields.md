@@ -4,9 +4,10 @@
 
 ## Original Requirement
 
-Source: [openRuyi Packaging Guidelines · 基础字段与段落](https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines#基础字段与段落)
+Source: [openRuyi Packaging Guidelines · Basic Fields and Sections](https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines#basic-fields-and-sections)
 
-> Spec 必须包含以下字段与段落，且应当按如下顺序出现:
+> A spec file must contain the following fields and sections, and they
+> should appear in the order shown below:
 >
 > ```spec
 > Name:

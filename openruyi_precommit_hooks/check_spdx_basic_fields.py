@@ -1,12 +1,11 @@
 """Check that SPEC files have the required basic fields and sections.
 
-Validates SPEC files against the openRuyi Packaging Specification,
-section "基础字段与段落" (Basic Fields and Sections).
+Validates SPEC files against the "Basic Fields and Sections" section of
+the openRuyi Packaging Specification.
 
 Reference:
-https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines#基础字段与段落
+https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines
 """
-
 from __future__ import annotations
 
 import argparse
@@ -73,7 +72,6 @@ _KNOWN_SECTIONS: frozenset[str] = frozenset({
 _RE_KNOWN_SECTION = re.compile(r'^(%\w+)\b')
 
 
-
 # SPDX header detection
 _RE_SPDX = re.compile(r'^#\s*SPDX-')
 
@@ -133,13 +131,12 @@ def _parse_spec(lines: list[str]) -> tuple[
             i += 1
             # handle continuation lines (backslash or indented)
             while i < n and (
-                lines[i].rstrip().endswith('\\')
-                or (lines[i].startswith(' ') and lines[i].strip())
+                lines[i].rstrip().endswith('\\') or
+                (lines[i].startswith(' ') and lines[i].strip())
             ):
                 i += 1
-        elif _RE_KNOWN_SECTION.match(line):
-            maybe_sec = _RE_KNOWN_SECTION.match(line).group(1)
-            if maybe_sec in _KNOWN_SECTIONS:
+        elif (m_sec := _RE_KNOWN_SECTION.match(line)):
+            if m_sec.group(1) in _KNOWN_SECTIONS:
                 break
             else:
                 i += 1
@@ -227,7 +224,9 @@ def _check_basic_fields(filename: str) -> list[str]:
     # Skip backwards over comment lines.  If an RPM conditional macro
     # (%if / %else / %endif / ...) appears between sections, the
     # macro block itself provides structural separation — no error.
-    _RE_RPM_COND = re.compile(r'^%(?:if|ifarch|ifnarch|ifos|ifnos|else|elif|endif)\b')
+    _RE_RPM_COND = re.compile(
+        r'^%(?:if|ifarch|ifnarch|ifos|ifnos|else|elif|endif)\b',
+    )
     for idx in range(len(sections) - 1):
         _this_name, _this_start, this_end = sections[idx]
         next_name, next_start, _next_end = sections[idx + 1]
