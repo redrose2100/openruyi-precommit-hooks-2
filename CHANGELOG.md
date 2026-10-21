@@ -20,7 +20,9 @@
   required sections must be present, sections must be ordered and separated by
   a blank line, `%changelog` must contain `%autochangelog`, `Release` should
   use `%autorelease`, and the core fields should keep their documented order
-  inside each field block.
+  inside each field block. Sections living in mutually exclusive conditional
+  branches are treated as already separated by the branch boundary and do not
+  need a blank line.
 - Repository-internal check `check-no-chinese`: fails if any checked file
   contains Chinese characters; reports the file path and line number. It is
   registered as a local hook in `.pre-commit-config.yaml` and run by CI on

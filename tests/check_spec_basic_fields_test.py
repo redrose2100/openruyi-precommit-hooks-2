@@ -270,6 +270,79 @@ Development files.
     assert _check_spec_basic_fields(_write(tmp_path, 'x.spec', content)) == []
 
 
+def test_sections_in_mutually_exclusive_branches_need_no_blank_line(
+    tmp_path: Path,
+) -> None:
+    # Reproduces SPECS/ceph/ceph.spec: the %package guarded by %else is a
+    # mutually exclusive alternative to the %description above it, so the two
+    # can never be adjacent in the expanded spec. The %else boundary is a
+    # stronger separator than a blank line.
+    content = """\
+Name:           foo
+Version:        1.0
+Release:        %autorelease
+Summary:        Example package
+License:        MulanPSL-2.0
+
+%description
+An example package.
+
+%if %{with dashboard}
+%package        dashboard
+Summary:        Dashboard
+
+%description    dashboard
+desc one
+%else
+%package        plain
+Summary:        Plain
+
+%description    plain
+desc two
+%endif
+
+%files
+%license LICENSE
+
+%changelog
+%autochangelog
+"""
+    assert _check_spec_basic_fields(_write(tmp_path, 'x.spec', content)) == []
+
+
+def test_branch_boundary_does_not_hide_missing_blank_line(
+    tmp_path: Path,
+) -> None:
+    # Inside a single branch the blank-line requirement still applies: both
+    # sections live on the same conditional branch path.
+    content = """\
+Name:           foo
+Version:        1.0
+Release:        %autorelease
+Summary:        Example package
+License:        MulanPSL-2.0
+
+%description
+An example package.
+
+%if %{with docs}
+%package        docs
+Summary:        Docs
+%description    docs
+docs desc
+%endif
+
+%files
+%license LICENSE
+
+%changelog
+%autochangelog
+"""
+    errors = _check_spec_basic_fields(_write(tmp_path, 'x.spec', content))
+    assert any('must be separated' in err for err in errors), errors
+    assert any('"%description"' in err for err in errors), errors
+
+
 def test_macro_lines_are_not_treated_as_sections(tmp_path: Path) -> None:
     # %doc, %license and %autochangelog must not trigger the blank-line check.
     content = """\

@@ -6,7 +6,9 @@ Skeleton Example" sections of the openRuyi Packaging Specification:
 * the fields ``Name`` ``Version`` ``Release`` ``Summary`` ``License`` and
   the sections ``%description`` ``%files`` ``%changelog`` must be present
 * those sections must appear in that relative order
-* sections must be separated by a blank line
+* sections on the same conditional branch must be separated by a blank line
+  (a conditional branch boundary is itself a separator, so sections in
+  mutually exclusive branches need no blank line)
 * ``%changelog`` must contain ``%autochangelog``
 * ``Release`` should use ``%autorelease``
 * inside each field block the five core fields should appear in the
@@ -101,6 +103,19 @@ _RE_CONDITIONAL = re.compile(
     r'^%(?:if|ifarch|ifnarch|ifos|ifnos|else|elif|endif|end|global|'
     r'define|bcond|undefine|dnl)\b',
 )
+# Keyword of a conditional directive, without the leading "%".
+_RE_CONDITIONAL_KEYWORD = re.compile(r'^%(\w+)')
+
+# Conditional directives that open a branch.
+_OPEN_CONDITIONALS = frozenset(
+    {'if', 'ifarch', 'ifnarch', 'ifos', 'ifnos'},
+)
+# Conditional directives that switch to the next branch of the innermost
+# open conditional.
+_ELSE_CONDITIONALS = frozenset({'else', 'elif'})
+# Conditional directives that close the innermost open conditional.
+_CLOSE_CONDITIONALS = frozenset({'endif', 'end'})
+
 _RE_SOURCE_N = re.compile(r'^Source(\d+)$')
 _RE_PATCH_N = re.compile(r'^Patch(\d+)$')
 _RE_BUILD_OPTION = re.compile(r'^BuildOption\(')
@@ -256,10 +271,44 @@ def _has_blank_separator(
     return False
 
 
+def _conditional_branch_paths(lines: list[str]) -> list[tuple[int, ...]]:
+    """Return the conditional branch path in effect on each line.
+
+    The path is the list of branch numbers of the conditionals that are
+    open on that line: the first branch of a conditional is 0, the branch
+    after a ``%else`` is 1, and so on. Two lines on different paths belong
+    to mutually exclusive branches, so ``rpmbuild`` can never emit them as
+    adjacent lines of the expanded spec.
+    """
+    paths: list[tuple[int, ...]] = []
+    stack: list[int] = []
+    for line in lines:
+        if _RE_CONDITIONAL.match(line):
+            keyword = _RE_CONDITIONAL_KEYWORD.match(line)
+            if keyword is not None:
+                name = keyword.group(1)
+                if name in _OPEN_CONDITIONALS:
+                    stack.append(0)
+                elif name in _ELSE_CONDITIONALS:
+                    if stack:
+                        stack[-1] += 1
+                elif name in _CLOSE_CONDITIONALS:
+                    if stack:
+                        stack.pop()
+        paths.append(tuple(stack))
+    return paths
+
+
 def _check_section_blank_lines(
     lines: list[str], sections: list[tuple[str, int]],
 ) -> list[str]:
-    """Adjacent differently named sections need a blank line between them."""
+    """Adjacent differently named sections need a blank line between them.
+
+    Two sections that live in mutually exclusive conditional branches are
+    never adjacent in the expanded spec, so they are treated as separated: a
+    conditional boundary is at least as strong a separator as a blank line.
+    """
+    paths = _conditional_branch_paths(lines)
     errors: list[str] = []
     for (prev_name, prev_line), (name, line) in zip(
         sections, sections[1:],
@@ -267,6 +316,9 @@ def _check_section_blank_lines(
         if name == prev_name:
             # Consecutive blocks of the same section are normal, e.g. the
             # %files sections of several subpackages.
+            continue
+        if paths[prev_line] != paths[line]:
+            # The sections belong to different conditional branches.
             continue
         if _has_blank_separator(lines, prev_line, line):
             continue

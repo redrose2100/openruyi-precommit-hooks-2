@@ -26,7 +26,9 @@ The rule covers **only** those two sections of the packaging guidelines.
   leaves no gap. `Source` / `Source0` / `Source1` share the same position.
 - The same relative order applies inside each `%package` block, evaluated
   independently; a subpackage only needs the fields that apply to it.
-- Sections **must** be separated by a blank line.
+- Sections **must** be separated by a blank line. Sections that sit in
+  mutually exclusive conditional branches are already separated by the
+  branch boundary and need no blank line.
 - `%changelog` content **must** be `%autochangelog`.
 - `Release` **should** use `%autorelease`.
 
@@ -44,7 +46,7 @@ body.
 | 1 | Required fields | The spec must contain `Name`, `Version`, `Release`, `Summary`, `License` | Any of the five is absent from every field block |
 | 2 | Required sections | The spec must contain `%description`, `%files`, `%changelog` | Any of the three is absent |
 | 3 | Section order | `%description` before `%files` before `%changelog` (relative order) | A later section appears before an earlier one |
-| 4 | Section separation | Adjacent, **differently named** sections must be separated by a blank line | No blank line separates two distinct section headers, ignoring comment lines and RPM conditionals |
+| 4 | Section separation | Adjacent, **differently named** sections on the same conditional branch must be separated by a blank line | Two distinct section headers sit on the same conditional branch path with no blank line between them, ignoring comment lines and RPM conditionals |
 | 5 | Changelog content | The first non-blank line of `%changelog` must be `%autochangelog` (the legacy form `%{?autochangelog}` is equivalent and accepted) | The body is a manual changelog, is empty, or starts with anything else |
 | 6 | Core field order | Inside each field block, the core fields that are present must keep the order `Name` → `Version` → `Release` → `Summary` → `License` | Two present core fields are inverted |
 | 7 | Autorelease | `Release` should be `%autorelease` (the brace form `%{autorelease}` is accepted) | `Release` has some other value |
@@ -85,6 +87,35 @@ body.
   is not.
 - Consecutive sections with the **same** name are never reported: it is
   normal for several subpackages to emit a `%files` block in sequence.
+- A section is defined as a structural header such as `%description`,
+  `%package`, `%prep`, `%build`, `%install`, `%check`, `%files` or
+  `%changelog`. RPM conditionals (`%if` `%else` `%elif` `%endif`) are macro
+  preprocessing directives, not sections: they are evaluated before the
+  section structure exists, so the sections they guard never coexist in the
+  same expanded spec. Because of that, two sections on different conditional
+  branch paths are treated as separated and are not required to have a blank
+  line between them. This accepts the common shape below, where the
+  `%else` boundary — not a blank line — separates the two `%description` /
+  `%package` pairs:
+
+  ```spec
+  %description    mgr-dashboard
+  ceph-mgr-dashboard is a manager module.
+  %else
+  %package        mgr-diskprediction-local
+  ```
+
+  Inside a single branch the requirement still applies, so the body above a
+  `%changelog` header must still be separated from it:
+
+  ```spec
+  %files
+  %{_bindir}/foo
+  %changelog
+  %autochangelog
+  ```
+
+  is reported.
 
 ## Usage
 
