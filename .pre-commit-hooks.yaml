@@ -6,3 +6,12 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-basic-fields
+  name: check-spec-basic-fields
+  description: Ensure spec files follow the basic fields and sections rules from the openRuyi packaging guidelines.
+  entry: check-spec-basic-fields
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true

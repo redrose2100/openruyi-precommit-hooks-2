@@ -14,6 +14,13 @@
   copyright lines and the license line; duplicate copyright/license lines,
   contributors in invalid positions, and SPDX declarations after the license
   line are rejected.
+- Second rule hook `check-spec-basic-fields`: validates that spec files follow
+  the "Basic Fields and Sections" and "Minimal Skeleton Example" sections of
+  the openRuyi packaging guidelines — the five required fields and the three
+  required sections must be present, sections must be ordered and separated by
+  a blank line, `%changelog` must contain `%autochangelog`, `Release` should
+  use `%autorelease`, and the core fields should keep their documented order
+  inside each field block.
 - Repository-internal check `check-no-chinese`: fails if any checked file
   contains Chinese characters; reports the file path and line number. It is
   registered as a local hook in `.pre-commit-config.yaml` and run by CI on

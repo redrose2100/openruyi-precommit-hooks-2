@@ -9,16 +9,19 @@ structure, development workflow, testing, and commit conventions.
 openruyi-precommit-hooks/
 ├── openruyi_precommit_hooks/     # hook implementation source
 │   ├── __init__.py
-│   └── check_spdx_header.py      # check-spdx-header hook
+│   ├── check_spdx_header.py      # check-spdx-header hook
+│   └── check_spec_basic_fields.py  # check-spec-basic-fields hook
 ├── scripts/                      # repo-internal checks (not published)
 │   └── check_no_chinese.py
 ├── tests/                        # pytest tests
 │   ├── __init__.py
-│   └── check_spdx_header_test.py
+│   ├── check_spdx_header_test.py
+│   └── check_spec_basic_fields_test.py
 ├── docs/
 │   ├── user-guide.md            # user guide (how to use hooks & the list)
 │   ├── rules/                   # rule docs (detailed checking rules)
-│   │   └── check-spdx-header.md
+│   │   ├── check-spdx-header.md
+│   │   └── check-spec-basic-fields.md
 │   └── developer-guide.md       # this document
 ├── setup.cfg                     # packaging config (console_scripts entries)
 ├── setup.py

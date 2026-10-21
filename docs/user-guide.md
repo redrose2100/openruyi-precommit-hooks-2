@@ -39,11 +39,12 @@ files every time you run `git commit`. You can also run a single hook:
 $ pre-commit run check-spdx-header --all-files
 ```
 
-## Supported Hooks (1 in total)
+## Supported Hooks (2 in total)
 
 | # | Hook ID | Description | Rule Doc |
 | --- | --- | --- | --- |
 | 1 | `check-spdx-header` | Validates that spec files start with SPDX copyright and license declarations (ISCAS + openRuyi Contributors + MulanPSL-2.0) | [rules/check-spdx-header.md](rules/check-spdx-header.md) |
+| 2 | `check-spec-basic-fields` | Validates that spec files follow the openRuyi packaging guideline rules for the basic fields and sections | [rules/check-spec-basic-fields.md](rules/check-spec-basic-fields.md) |
 
 ## Standalone CLI Usage
 
@@ -52,6 +53,7 @@ run without pre-commit:
 
 ```console
 $ check-spdx-header path/to/foo.spec
+$ check-spec-basic-fields path/to/foo.spec
 ```
 
 An exit code of 1 means some files do not meet the requirements; 0 means
