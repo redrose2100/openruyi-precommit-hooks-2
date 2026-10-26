@@ -39,12 +39,13 @@ files every time you run `git commit`. You can also run a single hook:
 $ pre-commit run check-spdx-header --all-files
 ```
 
-## Supported Hooks (2 in total)
+## Supported Hooks (3 in total)
 
 | # | Hook ID | Description | Rule Doc |
 | --- | --- | --- | --- |
 | 1 | `check-spdx-header` | Validates that spec files start with SPDX copyright and license declarations (ISCAS + openRuyi Contributors + MulanPSL-2.0) | [rules/check-spdx-header.md](rules/check-spdx-header.md) |
 | 2 | `check-spec-basic-fields` | Validates that spec files follow the openRuyi packaging guideline rules for the basic fields and sections | [rules/check-spec-basic-fields.md](rules/check-spec-basic-fields.md) |
+| 3 | `check-spec-name` | Validates that the spec `Name` field follows the openRuyi packaging guideline naming rules, including the case its own `Source` URLs use | [rules/check-spec-name.md](rules/check-spec-name.md) |
 
 ## Standalone CLI Usage
 
@@ -54,10 +55,16 @@ run without pre-commit:
 ```console
 $ check-spdx-header path/to/foo.spec
 $ check-spec-basic-fields path/to/foo.spec
+$ check-spec-name path/to/foo.spec
 ```
 
 An exit code of 1 means some files do not meet the requirements; 0 means
 all files pass.
+
+`check-spec-name` additionally exposes an opt-in `--verify-upstream` mode that
+resolves the names no `Source` URL can settle by querying the host. It is not
+registered as a hook because it makes network requests; see
+[rules/check-spec-name.md](rules/check-spec-name.md) for the flags.
 
 See each rule's document for detailed checking rules and examples:
 [rules/](rules/)

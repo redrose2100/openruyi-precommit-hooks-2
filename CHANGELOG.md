@@ -23,6 +23,27 @@
   inside each field block. Sections living in mutually exclusive conditional
   branches are treated as already separated by the branch boundary and do not
   need a blank line.
+- Third rule hook `check-spec-name`: validates the `Name` field against the
+  "Name" section and the "Naming" chapter of the openRuyi packaging
+  guidelines — the field must be present and non-empty, may only use
+  `[A-Za-z0-9._+-]`, must not start or end with a separator, must not contain
+  repeated separators, and must not be reused by a subpackage of the same spec
+  (compared case-insensitively). The lowercase preference is enforced by
+  default with `perl-*` exempted, and can be disabled with `--no-check-case`;
+  the hyphen-over-underscore preference is opt-in via `--check-separator`.
+  A capitalized name is additionally judged against the case its own
+  `Source\d*` URLs use, so the names that are genuinely upstream spellings are
+  silenced by evidence instead of by a blanket `--no-check-case`, and a
+  lowercase name against a capitalized artefact is caught as well; the
+  `URL:` line is excluded as evidence because a forge normalizes its path
+  while the tarball keeps the real spelling. This check is purely offline and
+  can be disabled with `--no-check-upstream-case`, which reproduces the
+  earlier output exactly. For the names no `Source` URL can settle, the
+  abstract rule module exposes an opt-in `--verify-upstream` command that
+  probes the URL itself and then the owning package index (GitHub, GitLab,
+  PyPI, crates.io); it is deliberately not registered as a hook because it
+  opens sockets, and it reports an undecided name as an error rather than
+  dropping it.
 - Repository-internal check `check-no-chinese`: fails if any checked file
   contains Chinese characters; reports the file path and line number. It is
   registered as a local hook in `.pre-commit-config.yaml` and run by CI on

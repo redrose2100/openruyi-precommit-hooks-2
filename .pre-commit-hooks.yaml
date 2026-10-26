@@ -15,3 +15,12 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-name
+  name: check-spec-name
+  description: Ensure the spec Name field follows the naming rules from the openRuyi packaging guidelines. A capitalized name is checked against the case its Source URLs use; use --no-check-upstream-case to skip that and --no-check-case to skip the case rule as well, and --check-separator to also reject underscores.
+  entry: check-spec-name
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
