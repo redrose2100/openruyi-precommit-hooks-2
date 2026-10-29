@@ -25,9 +25,9 @@ Source: [openRuyi Packaging Guidelines · SPDX Copyright and License Declaration
 | 1 | Declaration position | The file must start with SPDX declarations — the **first line** of the file must be an SPDX line (`SPDX-FileCopyrightText:`, `SPDX-FileContributor:` or `SPDX-License-Identifier:`); leading blank lines and leading comments are not allowed, and the header block may only contain SPDX declarations | File is empty, not UTF-8 encoded, starts with a blank line, does not start with a comment, starts with a non-SPDX comment, or contains a non-SPDX comment inside the header block |
 | 2 | ISCAS copyright | Contains `# SPDX-FileCopyrightText: (C) <year> Institute of Software, Chinese Academy of Sciences (ISCAS)` (required, exactly once) | Fails if missing or duplicated |
 | 3 | openRuyi copyright | Contains `# SPDX-FileCopyrightText: (C) <year> openRuyi Project Contributors` (required, exactly once) | Fails if missing or duplicated |
-| 4 | Contributor attribution | `# SPDX-FileContributor: ...` (optional, zero or more lines) | Fails if a contributor line appears outside its expected position (before the copyrights, between the two copyrights, between the blank line and the license, or after the license) |
-| 5 | Separating blank line | **Exactly one** `#` blank comment line between the copyright block and the license line (required) | Fails if missing or more than one |
-| 6 | License identifier | Contains `# SPDX-License-Identifier: MulanPSL-2.0` (required, exactly once), and the license value must be the default `MulanPSL-2.0`; it must be the last SPDX declaration in the header block | Fails if missing; fails if present but not the default `MulanPSL-2.0`; fails if duplicated or followed by other SPDX declarations |
+| 4 | Contributor attribution | `# SPDX-FileContributor: ...` (optional, zero or more lines) | Fails if a contributor line appears outside its expected position (before the copyrights, between the two copyrights, or between the blank line and the license) |
+| 5 | Separating blank line | Zero or more `#` blank comment lines may separate the copyright block from the license line (optional) | Never fails on its own; a missing or extra blank line is accepted |
+| 6 | License identifier | Contains `# SPDX-License-Identifier: MulanPSL-2.0` (required, exactly once), and the license value must be the default `MulanPSL-2.0`; the license line **terminates** the header block, so anything after it is outside the checked header | Fails if missing or if present but not the default `MulanPSL-2.0` |
 
 ### Year Formats
 
@@ -163,10 +163,39 @@ Name:           foo
 foo.spec: duplicate ISCAS copyright line, expected it exactly once
 ```
 
+### Pass ✅ (no blank `#` separator)
+
+The blank `#` separator line is optional. Two copyright lines followed
+directly by the license line are accepted:
+
+```spec
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+```
+
+### Pass ✅ (comments after the license are ignored)
+
+The `SPDX-License-Identifier` line terminates the header block, so plain
+comments that follow it (such as a provenance note) are outside the checked
+header and are accepted:
+
+```spec
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+# Originally extracted from Fedora Project
+
+Name:           foo
+```
+
 ### Fail ❌ (contributor in invalid position)
 
 `SPDX-FileContributor` lines must appear after the two copyright lines and
-before the blank `#` line. A contributor placed before the copyrights (or
+before the license line. A contributor placed before the copyrights (or
 anywhere else outside that position) is rejected:
 
 ```spec

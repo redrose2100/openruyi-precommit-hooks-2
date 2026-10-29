@@ -117,6 +117,31 @@ Version:        1.0
             'good6.spec',
             id='multiple-trailing-blank-hash',
         ),
+        pytest.param(
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
+            'good7.spec',
+            id='license-ends-header-without-blank-comment',
+        ),
+        pytest.param(
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# SPDX-License-Identifier: MulanPSL-2.0
+# This comment is outside the SPDX header and should be ignored.
+
+Name:           foo
+Version:        1.0
+""",
+            'good8.spec',
+            id='license-stops-header-before-following-comments',
+        ),
     ],
 )
 def test_ok_header(tmp_path: Path, content: str, filename: str) -> None:
@@ -200,34 +225,6 @@ Version:        1.0
 """,
             'SPDX-License-Identifier must be the default license "MulanPSL-2.0" (found "MIT")',
             id='wrong-license',
-        ),
-        pytest.param(
-            # no blank "#" line between copyright and license
-            """\
-# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
-# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
-# SPDX-License-Identifier: MulanPSL-2.0
-
-Name:           foo
-Version:        1.0
-""",
-            ['missing required blank "#" comment line'],
-            id='missing-blank',
-        ),
-        pytest.param(
-            # two blank "#" lines
-            """\
-# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
-# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
-#
-#
-# SPDX-License-Identifier: MulanPSL-2.0
-
-Name:           foo
-Version:        1.0
-""",
-            ['there must be exactly one blank "#" comment line'],
-            id='too-many-blank',
         ),
         pytest.param(
             """\
@@ -337,7 +334,8 @@ Version:        1.0
             id='duplicate-ruyi-copyright',
         ),
         pytest.param(
-            # duplicate SPDX-License-Identifier line
+            # a second SPDX-License-Identifier after the terminating license line
+            # is outside the validated header block and is ignored
             """\
 # SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
@@ -348,8 +346,8 @@ Version:        1.0
 Name:           foo
 Version:        1.0
 """,
-            ['duplicate SPDX-License-Identifier line'],
-            id='duplicate-license-line',
+            [],
+            id='duplicate-license-line-is-ignored-after-terminator',
         ),
         pytest.param(
             # contributor before copyright
@@ -397,7 +395,7 @@ Version:        1.0
             id='contributor-between-blank-and-license',
         ),
         pytest.param(
-            # contributor after the license
+            # contributor after the license is outside the checked header block
             """\
 # SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
@@ -408,8 +406,8 @@ Version:        1.0
 Name:           foo
 Version:        1.0
 """,
-            ['header lines are out of order'],
-            id='contributor-after-license',
+            [],
+            id='contributor-after-license-is-ignored',
         ),
     ],
 )
@@ -427,6 +425,9 @@ def test_bad_header(
     errors = _check_spdx_header(path)
     if isinstance(expected, str):
         assert errors == [f'{path}: {expected}']
+        return
+    if expected == []:
+        assert errors == []
         return
     assert errors != []
     joined = '\n'.join(errors)

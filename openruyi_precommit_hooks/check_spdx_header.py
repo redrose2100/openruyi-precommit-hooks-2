@@ -27,11 +27,11 @@ _RE_SPDX_START = re.compile(r'^#\s*SPDX-')
 def _header_block(lines: list[str]) -> tuple[list[str], str | None]:
     """Extract the leading SPDX header block.
 
-    Returns (spdx_lines, error). spdx_lines is the contiguous comment
-    block starting at the very first line; error describes why the file
-    does not start with SPDX declarations, or is None when it does.
-    The first line must be an SPDX declaration: leading blank lines and
-    leading non-SPDX comments are rejected.
+    Returns (spdx_lines, error). spdx_lines is the leading comment block
+    that belongs to the SPDX header; once the required
+    SPDX-License-Identifier line is seen, the scan stops and any later
+    content is ignored. Error describes why the file does not start with
+    valid SPDX declarations, or is None when it does.
     """
     if not lines:
         return [], 'file is empty'
@@ -46,14 +46,15 @@ def _header_block(lines: list[str]) -> tuple[list[str], str | None]:
         )
     block: list[str] = []
     i = 0
-    while i < len(lines) and lines[i].lstrip().startswith('#'):
-        block.append(lines[i].strip())
+    while i < len(lines):
+        raw = lines[i]
+        stripped = raw.lstrip()
+        if not stripped.startswith('#'):
+            break
+        block.append(raw.strip())
+        if _RE_LICENSE_ANY.match(raw.strip()):
+            break
         i += 1
-
-    # Strip trailing blank "#" lines (issue #3) — they are noise after
-    # the SPDX header and should not trigger "license must be last" errors.
-    while block and _RE_BLANK_COMMENT.match(block[-1]):
-        block.pop()
 
     return block, None
 
@@ -180,35 +181,8 @@ def _check_spdx_header(filename: str) -> list[str]:
         )
         return _dedup(errors)
 
-    if has_iscas and has_ruyi:
-        i_ruyi = seq.index('ruyi')
-        i_license = seq.index('license')
-        between = seq[i_ruyi + 1:i_license]
-        n_blank = between.count('blank')
-        if n_blank == 0:
-            errors.append(
-                f'{filename}: missing required blank "#" comment '
-                'line between the copyright lines and '
-                'SPDX-License-Identifier',
-            )
-        elif n_blank > 1:
-            errors.append(
-                f'{filename}: there must be exactly one blank "#" '
-                'comment line between the copyright lines and '
-                'SPDX-License-Identifier',
-            )
-        elif seq[i_license - 1] != 'blank':
-            errors.append(
-                f'{filename}: the blank "#" comment line must '
-                'directly precede SPDX-License-Identifier',
-            )
-
-    # The license line must be the last SPDX declaration in the block.
-    if 'license' in seq and seq.index('license') != len(seq) - 1:
-        errors.append(
-            f'{filename}: SPDX-License-Identifier must be the last '
-            'line of the SPDX header block',
-        )
+    # The SPDX license line terminates the header block, so `license` is
+    # always the final item of `seq` here; nothing to check after it.
     return _dedup(errors)
 
 

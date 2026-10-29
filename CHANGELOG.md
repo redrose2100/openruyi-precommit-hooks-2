@@ -10,10 +10,10 @@
 - First rule hook `check-spdx-header`: validates that spec files start with
   SPDX copyright and license declarations (ISCAS + openRuyi Project
   Contributors + `SPDX-License-Identifier: MulanPSL-2.0`); the contributor
-  line is optional; exactly one blank `#` comment line must separate the
-  copyright lines and the license line; duplicate copyright/license lines,
-  contributors in invalid positions, and SPDX declarations after the license
-  line are rejected.
+  line is optional; the `SPDX-License-Identifier` line terminates the header
+  block, so trailing blank `#` lines and plain comments that follow it are
+  outside the checked header and are accepted; duplicate copyright/license
+  lines and contributors in invalid positions are rejected.
 - Second rule hook `check-spec-basic-fields`: validates that spec files follow
   the "Basic Fields and Sections" and "Minimal Skeleton Example" sections of
   the openRuyi packaging guidelines — the five required fields and the three
