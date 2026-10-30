@@ -409,6 +409,69 @@ Version:        1.0
             [],
             id='contributor-after-license-is-ignored',
         ),
+        pytest.param(
+            # Real openRuyi corpus case (SPECS/libdrm/libdrm.spec): the
+            # first contributor tag is misspelled "Contributer". It must
+            # fail, and the message must name the exact spelling fix
+            # instead of the generic "not an SPDX declaration" wording.
+            """\
+# SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributer: Jingkun Zheng <zhengjingkun@iscas.ac.cn>
+# SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           libdrm
+Version:        2.4.134
+""",
+            'unknown SPDX tag "SPDX-FileContributer", '
+            'did you mean "SPDX-FileContributor"? '
+            'SPDX tags are case-sensitive and spelled exactly',
+            id='misspelled-contributor-tag',
+        ),
+        pytest.param(
+            # lowercase tag is malformed too, but must still get the
+            # actionable spelling hint rather than the generic message
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# spdx-filecontributor: Your Name <your.email@example.com>
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
+            [
+                'unknown SPDX tag "spdx-filecontributor", '
+                'did you mean "SPDX-FileContributor"?',
+                'SPDX tags are case-sensitive and spelled exactly',
+            ],
+            id='lowercase-contributor-tag',
+        ),
+        pytest.param(
+            # a genuinely different SPDX tag is not a typo; it must be
+            # reported as an unsupported declaration, not guessed at
+            """\
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# SPDX-FileType: SOURCE
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+Version:        1.0
+""",
+            [
+                'unsupported SPDX declaration "SPDX-FileType"',
+                'SPDX-FileCopyrightText',
+                'SPDX-License-Identifier',
+                # a different tag is not a typo, so it must not be guessed
+                '!did you mean',
+            ],
+            id='unsupported-spdx-tag',
+        ),
     ],
 )
 def test_bad_header(

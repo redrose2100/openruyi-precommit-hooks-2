@@ -25,7 +25,7 @@ Source: [openRuyi Packaging Guidelines · SPDX Copyright and License Declaration
 | 1 | Declaration position | The file must start with SPDX declarations — the **first line** of the file must be an SPDX line (`SPDX-FileCopyrightText:`, `SPDX-FileContributor:` or `SPDX-License-Identifier:`); leading blank lines and leading comments are not allowed, and the header block may only contain SPDX declarations | File is empty, not UTF-8 encoded, starts with a blank line, does not start with a comment, starts with a non-SPDX comment, or contains a non-SPDX comment inside the header block |
 | 2 | ISCAS copyright | Contains `# SPDX-FileCopyrightText: (C) <year> Institute of Software, Chinese Academy of Sciences (ISCAS)` (required, exactly once) | Fails if missing or duplicated |
 | 3 | openRuyi copyright | Contains `# SPDX-FileCopyrightText: (C) <year> openRuyi Project Contributors` (required, exactly once) | Fails if missing or duplicated |
-| 4 | Contributor attribution | `# SPDX-FileContributor: ...` (optional, zero or more lines) | Fails if a contributor line appears outside its expected position (before the copyrights, between the two copyrights, or between the blank line and the license) |
+| 4 | Contributor attribution | `# SPDX-FileContributor: ...` (optional, **zero or more** lines — multiple contributors are supported) | Fails if a contributor line appears outside its expected position (before the copyrights, between the two copyrights, or between the blank line and the license) |
 | 5 | Separating blank line | Zero or more `#` blank comment lines may separate the copyright block from the license line (optional) | Never fails on its own; a missing or extra blank line is accepted |
 | 6 | License identifier | Contains `# SPDX-License-Identifier: MulanPSL-2.0` (required, exactly once), and the license value must be the default `MulanPSL-2.0`; the license line **terminates** the header block, so anything after it is outside the checked header | Fails if missing or if present but not the default `MulanPSL-2.0` |
 
@@ -42,6 +42,60 @@ Source: [openRuyi Packaging Guidelines · SPDX Copyright and License Declaration
 
 Regex validation example:
 `SPDX-FileCopyrightText: (C) \d{4}((,\s*\d{4})|(-\s*\d{4}))* <Organization>`
+
+### Multiple Contributors
+
+`SPDX-FileContributor` may repeat. The openRuyi corpus contains files
+with up to five contributor lines, and all of them are valid:
+
+```spec
+# SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributor: Jingkun Zheng <zhengjingkun@iscas.ac.cn>
+# SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
+# SPDX-FileContributor: yyjeqhc <jialin.oerv@isrc.iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+```
+
+Contributor lines must sit between the two copyright lines and the
+license line, in any number, with or without the optional `#` separator.
+
+### SPDX Tag Spelling
+
+SPDX tags are case-sensitive and must be spelled exactly. A misspelled
+tag is rejected, but the diagnostic names the exact fix so the error is
+not mistaken for a structural problem:
+
+```spec
+# SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributer: Jingkun Zheng <zhengjingkun@iscas.ac.cn>
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+Name:           foo
+```
+
+```
+foo.spec: unknown SPDX tag "SPDX-FileContributer", did you mean "SPDX-FileContributor"? SPDX tags are case-sensitive and spelled exactly
+```
+
+A lowercase tag gets the same hint:
+
+```
+foo.spec: unknown SPDX tag "spdx-filecontributor", did you mean "SPDX-FileContributor"? SPDX tags are case-sensitive and spelled exactly
+```
+
+A genuinely different SPDX tag is not treated as a typo; it is reported
+as an unsupported declaration:
+
+```
+foo.spec: unsupported SPDX declaration "SPDX-FileType", the header may only contain SPDX-FileCopyrightText, SPDX-FileContributor and SPDX-License-Identifier
+```
 
 ## Usage
 
