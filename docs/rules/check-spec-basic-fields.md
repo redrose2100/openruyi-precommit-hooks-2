@@ -44,7 +44,7 @@ body.
 | # | Checkpoint | Requirement | Failure condition |
 | --- | --- | --- | --- |
 | 1 | Required fields | The spec must contain `Name`, `Version`, `Release`, `Summary`, `License` | Any of the five is absent from every field block |
-| 2 | Required sections | The spec must contain `%description`, `%files`, `%changelog` | Any of the three is absent |
+| 2 | Required sections | The spec must contain `%description`, `%files`, `%changelog` — a section provided by a known section-providing macro (such as `%linux_package_implementation`) counts as present | Any of the three is absent from both the literal text and the known section-providing macros |
 | 3 | Section order | `%description` before `%files` before `%changelog` (relative order) | A later section appears before an earlier one |
 | 4 | Section separation | Adjacent, **differently named** sections on the same conditional branch must be separated by a blank line | Two distinct section headers sit on the same conditional branch path with no blank line between them, ignoring comment lines and RPM conditionals |
 | 5 | Changelog content | The first non-blank line of `%changelog` must be `%autochangelog` (the legacy form `%{?autochangelog}` is equivalent and accepted) | The body is a manual changelog, is empty, or starts with anything else |
@@ -64,6 +64,30 @@ body.
 - `%license`, `%doc`, `%systemd_post`, `%autochangelog`, `%find_lang` and
   similar macro invocations are never treated as sections, so they do not
   trigger the blank-line check.
+- **Section-providing macros** are the one exception to the closed section
+  set. `rpmbuild` expands macros before the section structure exists, so a
+  macro that emits whole sections makes those sections present in the
+  expanded spec even though the source shows only the invocation. The rule
+  recognises the kernel packaging macro
+  `%linux_package_implementation` (defined in
+  `SPECS/openruyi-linux-build/macros.linux`): it expands to the kernel
+  subpackages (`%package core` / `modules` / `devel`), their
+  `%description`s, the `%pretrans` / `%post` / `%preun` / `%posttrans`
+  scriptlets and the `%files` blocks, so a spec that ends with
+
+  ```spec
+  %linux_package_implementation
+
+  %changelog
+  %autochangelog
+  ```
+
+  is not reported as missing `%files`. The recognised sections sit on the
+  macro invocation line: they satisfy the required-sections and
+  section-order checks, they never require a blank line between themselves,
+  and the macro line itself is skipped by the backward separator scan just
+  like a conditional directive. The macro table is a **closed set** — an
+  unknown `%foo` line still cannot satisfy a required section.
 - Comment lines and RPM conditionals (`%if` `%ifarch` `%ifnarch` `%ifos`
   `%ifnos` `%else` `%elif` `%endif`) are skipped when collecting fields, and
   are also ignored by the blank-line check. A comment placed directly above
@@ -185,6 +209,29 @@ Development files for foo.
 
 %files devel
 %{_includedir}/foo.h
+
+%changelog
+%autochangelog
+```
+
+### Pass ✅ (required sections provided by a macro)
+
+Kernel specs delegate `%files`, the subpackages and the scriptlets to
+`%linux_package_implementation`; the expanded spec has all three required
+sections:
+
+```spec
+Name:           linux-lts-kmhv2
+Version:        6.6.67
+Release:        %autorelease
+Summary:        The Linux Kernel
+License:        GPL-2.0-only
+BuildRequires:  openruyi-linux-build
+
+%description
+This is the meta package that handles standard %{name} kernel installation.
+
+%linux_package_implementation
 
 %changelog
 %autochangelog

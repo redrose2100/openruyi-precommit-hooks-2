@@ -15,6 +15,9 @@ Skeleton Example" sections of the openRuyi Packaging Specification:
   documented order
 
 A missing conditional field or conditional section is not a violation.
+Sections emitted by a known section-providing macro (such as
+``%linux_package_implementation`` for kernel specs) count as present at
+the macro invocation's line.
 """
 from __future__ import annotations
 
@@ -90,6 +93,30 @@ KNOWN_SECTIONS: frozenset[str] = frozenset({
     '%generate_buildrequires',
 })
 
+# Macro invocations that expand into whole RPM sections. ``rpmbuild``
+# expands them before the section structure exists, so the sections they
+# emit are present in the expanded spec even though the source shows only
+# the macro invocation. A spec that relies on such a macro must not be
+# reported as missing the sections it provides. The table is a closed set:
+# a new macro is added here explicitly, never guessed from a "%" line.
+# The tuple keeps the order in which the macro body emits the sections, so
+# the injected headers pair with the surrounding literal sections exactly
+# as the expanded spec would.
+SECTION_MACROS: dict[str, tuple[str, ...]] = {
+    # openRuyi kernel packaging macro (openruyi-linux-build/macros.linux):
+    # emits the kernel subpackages, their descriptions, scriptlets and
+    # their %files blocks.
+    '%linux_package_implementation': (
+        '%package',
+        '%description',
+        '%pretrans',
+        '%post',
+        '%preun',
+        '%posttrans',
+        '%files',
+    ),
+}
+
 # Sections that begin a new field block. Only %package does; every other
 # section ends the field-collection phase of the file.
 _BLOCK_SECTION = '%package'
@@ -157,6 +184,20 @@ def _is_section(line: str) -> str | None:
     return None
 
 
+def _macro_sections(line: str) -> tuple[str, ...] | None:
+    """Return the sections a macro invocation on this line expands to.
+
+    A known section-providing macro (see ``SECTION_MACROS``) expands into
+    whole RPM sections. ``rpmbuild`` expands the macro before the section
+    structure exists, so the sections it emits are present in the expanded
+    spec even though the source shows only the macro invocation.
+    """
+    match = _RE_SECTION.match(line)
+    if match is None:
+        return None
+    return SECTION_MACROS.get('%' + match.group(1))
+
+
 def _blocks_of(
     lines: list[str],
 ) -> tuple[list[dict[str, int]], list[tuple[str, int]]]:
@@ -178,8 +219,14 @@ def _blocks_of(
 
     for index, line in enumerate(lines):
         section = _is_section(line)
-        if section is not None:
-            sections.append((section, index))
+        macro_sections = _macro_sections(line)
+        if section is not None or macro_sections is not None:
+            if section is not None:
+                sections.append((section, index))
+            if macro_sections is not None:
+                # The macro expands into whole sections at this line, in
+                # the order the macro body emits them.
+                sections.extend((name, index) for name in macro_sections)
             if section == _BLOCK_SECTION:
                 # A %package section opens a fresh field block.
                 blocks.append(current)
@@ -265,7 +312,11 @@ def _has_blank_separator(
         text = lines[index]
         if not text.strip():
             return True
-        if _RE_CONDITIONAL.match(text) or text.lstrip().startswith('#'):
+        if (
+            _RE_CONDITIONAL.match(text) or
+            _macro_sections(text) is not None or
+            text.lstrip().startswith('#')
+        ):
             continue
         return False
     return False
@@ -313,6 +364,10 @@ def _check_section_blank_lines(
     for (prev_name, prev_line), (name, line) in zip(
         sections, sections[1:],
     ):
+        if prev_line == line:
+            # Both headers come from the same macro invocation line and
+            # cannot be separated in the source.
+            continue
         if name == prev_name:
             # Consecutive blocks of the same section are normal, e.g. the
             # %files sections of several subpackages.

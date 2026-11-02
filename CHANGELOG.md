@@ -1,5 +1,18 @@
 # CHANGELOG
 
+### Fixed
+
+- `check-spec-basic-fields`: no longer reports `missing required section
+  "%files"` for kernel specs (`linux-lts-kmhv2`, `linux-lts`) that delegate
+  `%files`, the subpackages, their `%description`s and the scriptlets to the
+  `%linux_package_implementation` macro (defined in
+  `SPECS/openruyi-linux-build/macros.linux`). A known section-providing
+  macro counts as present at its invocation line for the required-sections
+  and section-order checks, needs no blank line between the sections it
+  emits, and its own line is skipped by the backward separator scan. The
+  macro table is a closed set — an unknown `%foo` line still cannot satisfy
+  a required section.
+
 ### Added
 
 - Project scaffolding: `setup.cfg` / `setup.py` packaging configuration,

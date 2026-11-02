@@ -365,6 +365,131 @@ An example package.
     assert _check_spec_basic_fields(_write(tmp_path, 'x.spec', content)) == []
 
 
+# --- checkpoint 4b: macro-provided sections ---------------------------------
+
+
+def test_sections_provided_by_macro_satisfy_required_sections(
+    tmp_path: Path,
+) -> None:
+    # Reproduces SPECS/linux-lts-kmhv2/linux-lts-kmhv2.spec (and linux.spec,
+    # linux-lts.spec): %files and the subpackages are emitted by
+    # %linux_package_implementation instead of being written literally.
+    content = """\
+Name:           linux-lts-kmhv2
+Version:        6.6.67
+Release:        %autorelease
+Summary:        The Linux Kernel
+License:        GPL-2.0-only
+URL:            https://www.kernel.org/
+Source0:        https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-%{version}.tar.xz
+BuildRequires:  openruyi-linux-build
+%linux_package_dependencies
+
+%description
+This is the meta package that handles standard %{name} kernel installation.
+
+%linux_package_implementation
+
+%changelog
+%autochangelog
+"""
+    assert _check_spec_basic_fields(_write(tmp_path, 'x.spec', content)) == []
+
+
+def test_macro_line_is_not_itself_a_section(tmp_path: Path) -> None:
+    # The macro invocation line must not trigger the blank-line check on its
+    # own; only the sections it expands to are recognised.
+    content = """\
+Name:           foo
+Version:        1.0
+Release:        %autorelease
+Summary:        Example package
+License:        MulanPSL-2.0
+
+%description
+An example package.
+
+%linux_package_implementation
+
+%changelog
+%autochangelog
+"""
+    assert _check_spec_basic_fields(_write(tmp_path, 'x.spec', content)) == []
+
+
+def test_unknown_macro_does_not_satisfy_required_sections(
+    tmp_path: Path,
+) -> None:
+    # A spec that relies on an unrecognised macro for its %files still
+    # reports the missing section; the macro table is a closed set.
+    content = """\
+Name:           foo
+Version:        1.0
+Release:        %autorelease
+Summary:        Example package
+License:        MulanPSL-2.0
+
+%description
+An example package.
+
+%unknown_section_provider
+
+%changelog
+%autochangelog
+"""
+    errors = _check_spec_basic_fields(_write(tmp_path, 'x.spec', content))
+    assert any('missing required section "%files"' in err for err in errors), errors
+
+
+def test_no_blank_line_required_between_macro_provided_sections(
+    tmp_path: Path,
+) -> None:
+    # The %package / %description / scriptlet / %files headers emitted by
+    # the macro all sit on the macro invocation line, so the blank-line
+    # check must not compare them pairwise.
+    content = """\
+Name:           foo
+Version:        1.0
+Release:        %autorelease
+Summary:        Example package
+License:        MulanPSL-2.0
+
+%description
+An example package.
+
+%linux_package_implementation
+
+%files
+%license LICENSE
+
+%changelog
+%autochangelog
+"""
+    errors = _check_spec_basic_fields(_write(tmp_path, 'x.spec', content))
+    assert not any('must be separated' in err for err in errors), errors
+
+
+def test_blank_line_still_required_around_macro_line(tmp_path: Path) -> None:
+    # The macro line is a boundary: a literal section directly above it
+    # still needs a blank line separator.
+    content = """\
+Name:           foo
+Version:        1.0
+Release:        %autorelease
+Summary:        Example package
+License:        MulanPSL-2.0
+
+%description
+An example package.
+%linux_package_implementation
+
+%changelog
+%autochangelog
+"""
+    errors = _check_spec_basic_fields(_write(tmp_path, 'x.spec', content))
+    assert any('must be separated' in err for err in errors), errors
+
+
 def test_comment_directly_above_section_is_allowed(tmp_path: Path) -> None:
     # A comment directly above a header (with a blank line before the comment)
     # reads as part of that header.
