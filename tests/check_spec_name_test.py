@@ -287,6 +287,43 @@ def test_perl_names_are_exempt_from_the_case_check(
     assert _findings(tmp_path, value) == []
 
 
+@pytest.mark.parametrize(
+    'value',
+    ['python-Whoosh', 'python-Scikit-Learn', 'python-Zope-Interface'],
+    ids=['python-Whoosh', 'python-Scikit-Learn', 'python-Zope-Interface'],
+)
+def test_python_names_are_exempt_from_the_case_check(
+    tmp_path: Path, value: str,
+) -> None:
+    """A Python library source package must carry the ``python-`` prefix,
+    after which the rest of the name is the upstream PyPI spelling and may
+    be capitalized."""
+    assert _findings(tmp_path, value) == []
+
+
+def test_python_prefix_still_reports_non_upper_case_findings(
+    tmp_path: Path,
+) -> None:
+    """The exemption covers only the case check, not the other checkpoints."""
+    path = _write(tmp_path, 'x.spec', _spec('python-Whoosh--extra'))
+    errors = _check_spec_name_ext(path)
+    assert len(errors) == 1, errors
+    assert any('consecutive separators' in err for err in errors), errors
+    assert not any('uppercase' in err for err in errors), errors
+
+
+def test_python_srcname_macro_is_exempt(tmp_path: Path) -> None:
+    """``Name: python-%{srcname}`` with ``%global srcname Whoosh`` resolves
+    to ``python-Whoosh`` and must stay silent, as in the real
+    ``python-Whoosh.spec``."""
+    content = (
+        '%global srcname Whoosh\n'
+        'Name:           python-%{srcname}\n'
+        'Version:        2.7.4\n'
+    )
+    assert _findings_from(tmp_path, content) == []
+
+
 def test_no_check_case_clears_the_case_finding(tmp_path: Path) -> None:
     path = _write(tmp_path, 'x.spec', _spec('libX11'))
     assert _check_spec_name_ext(path, check_case=False) == []

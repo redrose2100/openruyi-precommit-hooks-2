@@ -40,6 +40,15 @@ inspected.
 - Perl modules are the exception — CPAN groups and types should be
   capitalized.
 
+### Naming — module packages
+
+- A source package whose primary content is a Python library **must** be named
+  with a `python-` prefix. The rest of the name is the upstream PyPI
+  distribution name, which may legitimately be capitalized (`python-Whoosh`).
+- A subpackage that enhances an existing openRuyi package but cannot work on
+  its own takes the form `%{parent}-%{child}` (e.g. `php-imagemagick`,
+  `python-setuptools`).
+
 ## Checkpoints
 
 | # | Checkpoint | Requirement | Failure condition | Flag | Default |
@@ -49,7 +58,7 @@ inspected.
 | 3 | Delimiters | The value must not begin or end with a separator | The first or last character is `-`, `_` or `.` | — | on |
 | 4 | Repeated separators | The value must not contain two separators in a row | `--`, `__`, `..`, `-_`, `_-`, `._`, `_.`, `-.` or `.-` appears | — | on |
 | 5 | Name conflict | A subpackage must not reuse the main package name, compared case-insensitively | A resolved `%package` name equals the main name | — | on |
-| 6 | Lowercase | The value should be lowercase unless the upstream name is capitalized | The value contains an uppercase letter and does not start with `perl-` | `--no-check-case` | on |
+| 6 | Lowercase | The value should be lowercase unless the upstream name is capitalized | The value contains an uppercase letter and does not start with `perl-` or `python-` | `--no-check-case` | on |
 | 7 | Hyphen | The value should use `-` rather than `_` | The value contains `_` | `--check-separator` | off |
 | 8 | Source-URL case | The value should be spelled the way the project's own download URL spells it | No `Source` URL spells the value as written, but at least one spells it with a different case | `--no-check-upstream-case` | on |
 
@@ -57,7 +66,7 @@ inspected.
 
 Every clause below is a real part of the specification that this rule
 deliberately does not enforce. The measured counts come from a scan of the
-6149 spec files in the openRuyi `SPECS` tree.
+6290 spec files in the openRuyi `SPECS` tree.
 
 - **Checkpoint 6 is on by default**, which is a decision rather than a reading
   of the text: the case-sensitivity section says explicitly that case
@@ -65,26 +74,30 @@ deliberately does not enforce. The measured counts come from a scan of the
   sentence that follows is a real requirement with a real failure mode —
   silently lowercasing a package whose upstream name is capitalized.
   The scan finds 425 uppercase main names; 390 of them begin with `perl-` and
-  are excluded by checkpoint 6 itself, as the specification requires. The
-  remaining **35** are not all of the same kind, and checkpoint 8 is what tells
+  1 (`python-Whoosh`) begins with `python-`, and both are excluded by
+  checkpoint 6 itself, as the specification requires: perl modules must keep
+  the CPAN capitalization, and a Python library source package must carry the
+  `python-` prefix after which the PyPI spelling is upstream's own. The
+  remaining **34** are not all of the same kind, and checkpoint 8 is what tells
   them apart: **31** are silenced because the project's own download URL spells
   them exactly, **2** would be silenced by checkpoint 6 but are **reported** by
-  checkpoint 8 because their URL spells a different case, and **2** cannot be
-  decided from the spec at all, so checkpoint 6 still reports them:
+  checkpoint 8 because their URL spells a different case, and **1** cannot be
+  decided from the spec at all, so checkpoint 6 still reports it:
 
   | Group | Count | Names |
   | --- | --- | --- |
   | URL confirms the spelling, silent | 31 | `Catch2`, `ModemManager`, `NetworkManager`, `PackageKit`, `PackageKit-Qt`, `SDL3`, `libICE`, `libSM`, `libX11`, `libXScrnSaver`, `libXau`, `libXcomposite`, `libXcursor`, `libXdamage`, `libXdmcp`, `libXext`, `libXfixes`, `libXfont2`, `libXft`, `libXi`, `libXinerama`, `libXmu`, `libXpresent`, `libXrandr`, `libXrender`, `libXres`, `libXt`, `libXtst`, `libXv`, `libXxf86vm`, `unixODBC` |
   | URL contradicts the spelling | 2 | `Xwayland` (URL says `xwayland`), `Aflplusplus` (URL says `AFLplusplus`) |
-  | No usable URL | 2 | `SDL2`, `python-Whoosh` |
+  | No usable URL | 1 | `SDL2` |
 
-  The two unresolved ones are unresolved for a different reason each, and each
-  is a lowercasing of the first letter rather than the upstream form: `SDL2`
-  sits on a repository named `SDL` whose `release-%{version}.tar.gz` artefact
-  encodes no `SDL2` at all, and `python-Whoosh` writes `python-%{srcname}` with
-  a `%{srcname}` that conflicts with the PyPI file name, so the two spellings
-  cancel out. A packager should confirm each of them by hand, which is what
-  `--verify-upstream` is for.
+  The one unresolved name is unresolved for its own reason: `SDL2` sits on a
+  repository named `SDL` whose `release-%{version}.tar.gz` artefact encodes no
+  `SDL2` at all. A packager should confirm it by hand, which is what
+  `--verify-upstream` is for. `python-Whoosh` used to be in this group too,
+  but it is not a case defect: the Naming guideline's module-package section
+  requires the `python-` prefix, and `Whoosh` is the upstream PyPI spelling
+  that the guideline tells the packager to keep, so checkpoint 6 now exempts
+  the whole `python-` prefix the way it exempts `perl-`.
 
 - **Checkpoint 8 is what makes checkpoint 6 usable.** It reads the same
   `Source` lines the `rpm` build reads, so the capitalization question is
@@ -120,14 +133,15 @@ deliberately does not enforce. The measured counts come from a scan of the
 - **Checkpoint 8 is not the network check.** It reads the spec and nothing
   else: it never opens a socket, so it stays usable as a pre-commit hook. The
   optional `--verify-upstream` mode described below adds a real network probe
-  for the two unresolved names; it is a separate, opt-in command and is
+  for the unresolved name; it is a separate, opt-in command and is
   **not** registered as a hook.
 
-  With checkpoints 1 to 8 at their defaults the scan reports **27** findings
-  over the 6149-spec tree, down from 36 before checkpoint 8 existed: the 1
-  checkpoint-4 finding, the 2 unresolved case findings and the 24
-  checkpoint-8 findings. Passing `--no-check-upstream-case` reproduces the old
-  behaviour exactly, all 36 of them.
+  With checkpoints 1 to 8 at their defaults the scan reports **26** findings
+  over the 6290-spec tree: the 1 checkpoint-4 finding, the 1 unresolved case
+  finding (`SDL2`) and the 24 checkpoint-8 findings. Passing
+  `--no-check-upstream-case` reproduces the pre-checkpoint-8 behaviour — every
+  uppercase name reported, no download URL consulted — 35 findings in total:
+  the 34 uppercase non-prefixed names plus the checkpoint-4 finding.
 
 - **Checkpoint 7 is off by default.** The scan finds 25 **resolved** main
   names containing `_`: `nss_wrapper`, `pam_wrapper`, `socket_wrapper`,
@@ -146,17 +160,17 @@ deliberately does not enforce. The measured counts come from a scan of the
   Names whose underscore only exists inside an unresolved macro —
   `python-%{pypi_name}`, `llvm%{maj_ver}`, `dotnet%{dotnet_major}` — are
   **not** reported, because checkpoint 7 is skipped for a macro-valued name.
-  One of the 25 is an inconsistency with its own directory name and is worth
-  reporting: `python-annotated_types` lives in `python-annotated-types`.
-  `python-mistral_common` has the same name in both places, so only the
-  separator convention itself is at issue there.
+  `python-mistral_common` is the only one whose underscore is a separator
+  convention issue, since its directory and spec agree on the same name;
+  every other name is either an upstream name that naturally contains an
+  underscore or a CPAN/PyPI distribution name that does.
 
 - **Checkpoints 6 and 8 interact with checkpoint 7.** `--check-separator` is
-  orthogonal, so enabling it takes the default 27 to 52: the 25 underscore
-  names plus the 27. Adding `--no-check-case` brings that to 50, because
-  `SDL2` and `python-Whoosh` stop being reported by checkpoint 6 while the
-  checkpoint-8 findings survive — a separator flag never silences a name whose
-  download URL proves the spelling wrong.
+  orthogonal, so enabling it takes the default 26 to 51: the 25 underscore
+  names plus the 26. Adding `--no-check-case` brings that to 50, because
+  `SDL2` stops being reported by checkpoint 6 while the checkpoint-8 findings
+  survive — a separator flag never silences a name whose download URL proves
+  the spelling wrong.
 
 - `+` is treated as an **ordinary character**, not a separator. `libsigc++` is
   a legitimate C++ library whose upstream name contains `++`, and the separator
@@ -186,11 +200,23 @@ deliberately does not enforce. The measured counts come from a scan of the
   already clean; a repo-wide conflict check still needs a separate tool, not a
   per-file hook.
 
-- **Not enforced: doc subpackage, font package, perl and Python prefixes.**
-  `%{name}-doc`, `fonts-[fontname]`, `perl-CPANDIST` and the `python-` prefix
-  are naming rules for *sub*packages or for a narrow package class, and a spec
-  is allowed to have no subpackage at all. They are out of the `Name` field
-  scope.
+- **Not enforced: doc subpackage and font package naming.** `%{name}-doc` and
+  `fonts-[fontname]` are naming rules for subpackages, and a spec is allowed
+  to have no subpackage at all, so they are out of the `Name` field scope.
+
+- **Not enforced: the `python-`/`perl-` prefix requirement itself.** The
+  Naming guideline's module-package section *requires* a Python library
+  source package to carry the `python-` prefix (`perl-CPANDIST` likewise for
+  perl). Checkpoint 6 exempts both prefixes from the case check — the rest of
+  the name is upstream's own spelling — but the hook does **not** enforce
+  that the prefix is present: a name like `Whoosh` without the `python-`
+  prefix passes today. Enforcing it would need a lookup of what the package
+  actually contains, which a per-file static hook cannot do; the prefix
+  requirement stays a review item for the packager. The `python-` prefix
+  check also has a real edge case: `Name: python-%{srcname}` with
+  `%global srcname Whoosh` resolves to `python-Whoosh` and is exempt, while
+  the bare `%{srcname}` inside `Source0` keeps the PyPI spelling for the
+  download URL.
 
 - **Macro-valued names.** `%{name}` is expanded to the main name, and any
   `%global` / `%define` value is expanded when it is known. A value that still

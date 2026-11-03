@@ -20,10 +20,14 @@ N5. The main package name is not reused by a subpackage of the same spec, with
     a case-insensitive comparison. The guideline states that conflicting names
     are absolutely forbidden, "including names that differ only in case".
 N6. The value does not contain uppercase characters, unless it starts with
-    ``perl-``. The guideline's case-sensitivity section says the default is
-    lowercase and that a lowercase name is wrong only when upstream capitalizes
-    its own name (``RapidCopy``). It also carves out perl: CPAN groups and types
-    must keep their uppercase spelling. N6 is on by default and reports the
+    ``perl-`` or ``python-``. The guideline's case-sensitivity section says
+    the default is lowercase and that a lowercase name is wrong only when
+    upstream capitalizes its own name (``RapidCopy``). It also carves out
+    perl: CPAN groups and types must keep their uppercase spelling. The
+    module-package section of the Naming guideline carves out Python the same
+    way: a Python library source package must carry the ``python-`` prefix,
+    after which the rest of the name is the upstream PyPI spelling and may be
+    capitalized (``python-Whoosh``). N6 is on by default and reports the
     upstream names whose capitalization the packager must preserve;
     ``--no-check-case`` turns it off for a repository that has accepted them.
     N8 silences N6 when the project's own download URL proves the spelling.
@@ -48,8 +52,11 @@ N8 reads the spec and nothing else: it never opens a socket.
 Everything that is not statically decidable is deliberately out of scope:
 encoding an ABI/SONAME major or an upstream major version into the name,
 ``Provides``-based upstream aliases, cross-file name conflicts (this hook runs
-per file), doc-subpackage and font-package naming, and the perl/Python prefix
-rules.
+per file), doc-subpackage and font-package naming, and the requirement that a
+Python or perl library package *carry* its ``python-``/``perl-`` prefix. The
+case exemption for both prefixes is implemented (N6), but the presence of the
+prefix itself is not enforced, because it needs a lookup of what the package
+actually contains that a per-file static hook cannot do.
 """
 from __future__ import annotations
 
@@ -95,6 +102,13 @@ _BAD_SEQUENCES: tuple[str, ...] = (
 # Uppercase in a perl module name is required by the guideline, so N6 skips
 # names carrying this prefix.
 _PERL_PREFIX = 'perl-'
+
+# A Python library source package must be named with a "python-" prefix (the
+# guideline's module-package section: "主要包含 Python 库的源码包必须以
+# ``python-`` 前缀命名"). The rest of the name is the upstream PyPI spelling,
+# which may legitimately be capitalized (e.g. ``python-Whoosh``), so N6 skips
+# names carrying this prefix just like it does for ``perl-``.
+_PYTHON_PREFIX = 'python-'
 
 # Matches a "Source", "Source0" or "Source12" line and captures the value.
 # Only Source lines count as upstream evidence: the URL line is a project page
@@ -312,7 +326,7 @@ def _check_duplicate(
 
 def _check_case(value: str, line: int) -> list[str]:
     """N6: prefer lowercase unless upstream capitalizes its own name."""
-    if value.startswith(_PERL_PREFIX):
+    if value.startswith(_PERL_PREFIX) or value.startswith(_PYTHON_PREFIX):
         return []
     if not any(char.isupper() for char in value):
         return []
