@@ -389,14 +389,16 @@ def test_source_url_confirming_the_spelling_keeps_the_rule_silent(
     assert _findings_from(tmp_path, content) == []
 
 
-def test_source_url_in_the_reverse_direction_is_reported(
+def test_lowercase_name_is_never_compared_to_the_url(
     tmp_path: Path,
 ) -> None:
-    """A lowercase name against a capitalized artefact is a finding too."""
-    errors = _findings_from(tmp_path, OPENBLAS_SPEC)
-    assert len(errors) == 1, errors
-    assert 'Source URLs' in errors[0], errors
-    assert '"OpenBLAS"' in errors[0], errors
+    """A lowercase name is the default, so no URL comparison happens.
+
+    ``openblas`` against an ``OpenBLAS`` artefact used to be a reverse N8
+    finding. The rule now only compares a value that contains an uppercase
+    letter, so a fully lowercase name stays silent.
+    """
+    assert _findings_from(tmp_path, OPENBLAS_SPEC) == []
 
 
 def test_mismatch_replaces_the_case_finding(tmp_path: Path) -> None:
@@ -429,14 +431,14 @@ def test_github_owner_and_repository_are_evidence(tmp_path: Path) -> None:
 
 def test_url_fragment_names_the_artefact(tmp_path: Path) -> None:
     content = (
-        'Name:           foo\n'
+        'Name:           Foo\n'
         'Version:        1.0\n'
         'Source0:        https://example.com/api/archive/deadbeef.tar.gz'
-        '#/Foo-1.0.tar.gz\n'
+        '#/FOO-1.0.tar.gz\n'
     )
     errors = _findings_from(tmp_path, content)
     assert len(errors) == 1, errors
-    assert '"Foo"' in errors[0], errors
+    assert '"FOO"' in errors[0], errors
 
 
 def test_url_tag_alone_is_never_evidence(tmp_path: Path) -> None:
@@ -494,9 +496,13 @@ def test_url_tag_is_bound_so_a_relative_source_expands(
 
 
 def test_archive_suffix_and_version_are_stripped(tmp_path: Path) -> None:
-    """``LMDB_0.9.36.tgz`` reduces to ``LMDB``, not to ``LMDB_0.9.36``."""
+    """``LMDB_0.9.36.tgz`` reduces to ``LMDB``, so ``Lmdb`` is a finding.
+
+    The stripping mechanism stays the same; the name only needs to carry an
+    uppercase letter for N8 to compare it against the artefact.
+    """
     content = (
-        'Name:           lmdb\n'
+        'Name:           Lmdb\n'
         'Version:        0.9.36\n'
         'Source0:        https://git.openldap.org/openldap/-/archive/'
         'LMDB_%{version}/openldap-LMDB_%{version}.tar.gz\n'
@@ -507,8 +513,9 @@ def test_archive_suffix_and_version_are_stripped(tmp_path: Path) -> None:
 
 
 def test_dot_separated_artefact_is_evidence(tmp_path: Path) -> None:
+    """A capitalized name against a dot-separated artefact is reported."""
     content = (
-        'Name:           lvm2\n'
+        'Name:           Lvm2\n'
         'Version:        2.03.35\n'
         'Source0:        https://sourceware.org/pub/lvm2/releases/LVM2.%{version}'
         '.tgz\n'
@@ -531,13 +538,6 @@ def test_no_check_upstream_case_restores_the_case_finding(
     errors = _check_spec_name_ext(path, check_upstream_case=False)
     assert len(errors) == 1, errors
     assert 'uppercase' in errors[0], errors
-
-
-def test_no_check_upstream_case_clears_a_reverse_mismatch(
-    tmp_path: Path,
-) -> None:
-    path = _write(tmp_path, 'x.spec', OPENBLAS_SPEC)
-    assert _check_spec_name_ext(path, check_upstream_case=False) == []
 
 
 @pytest.mark.parametrize(
@@ -939,9 +939,19 @@ def test_verify_upstream_is_not_registered_as_a_hook() -> None:
 
 
 def test_main_accepts_no_check_upstream_case(tmp_path: Path) -> None:
-    path = _write(tmp_path, 'x.spec', OPENBLAS_SPEC)
+    content = (
+        'Name:           Xwayland\n'
+        'Version:        24.1.11\n'
+        'Source0:        https://xorg.freedesktop.org/archive/individual/'
+        'xserver/xwayland-%{version}.tar.xz\n'
+    )
+    path = _write(tmp_path, 'x.spec', content)
+    # Default: N8 fires with the upstream spelling.
     assert main([path]) == 1
-    assert main(['--no-check-upstream-case', path]) == 0
+    # N8 off: the plain N6 case rule still fires.
+    assert main(['--no-check-upstream-case', path]) == 1
+    # Both case checks off: nothing fires.
+    assert main(['--no-check-case', '--no-check-upstream-case', path]) == 0
 
 
 def test_main_parses_the_verification_flags() -> None:

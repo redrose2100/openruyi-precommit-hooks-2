@@ -41,9 +41,11 @@ N8. A capitalized value is spelled the way the project's own download URL
     stay silent, and when it differs, N8 reports the mismatch instead of N6.
     Only the ``Source\\d*`` lines are read; the ``URL`` line is excluded because
     a forge normalises that path to lower case while the tarball keeps the real
-    spelling. N8 is bidirectional: it catches ``Name: openblas`` against an
-    ``OpenBLAS-0.3.31.tar.gz`` artefact, which N6 could never see, as well as
-    ``Name: Xwayland`` against ``xwayland-24.1.11.tar.xz``.
+    spelling. N8 only fires for a value that contains an uppercase letter: a
+    fully lowercase value already is the default the guideline asks for, so it
+    is never compared against the URLs. It is still bidirectional within that
+    scope: it catches ``Name: Xwayland`` against an ``xwayland-24.1.11.tar.xz``
+    artefact and ``Name: Aflplusplus`` against an ``AFLplusplus`` one.
     ``--no-check-upstream-case`` disables N8 and restores the evidence-free N6
     result.
 
@@ -543,15 +545,18 @@ def _check_upstream_case(
     line: int,
     spellings: set[str],
 ) -> list[str]:
-    """N8: the value matches a download URL only if case is ignored.
+    """N8: a capitalized value matches a download URL only if case is ignored.
 
-    Reaching here means no ``Source`` URL spells the name as written, but at
-    least one spells it the same way with a different case. The packager has to
-    decide which of the two is intended, so it is reported in either direction:
-    ``Xwayland`` against a ``xwayland`` artefact, and ``openblas`` against an
-    ``OpenBLAS`` one. It replaces N6 rather than adding to it, because the N6
-    text asks the packager to follow the upstream spelling, which is the very
-    thing this finding already contradicts.
+    Reaching here means the value contains an uppercase letter, no ``Source``
+    URL spells it as written, but at least one spells it the same way with a
+    different case. The packager has to decide which of the two is intended,
+    so it is reported in either direction: ``Xwayland`` against a ``xwayland``
+    artefact, and ``Aflplusplus`` against an ``AFLplusplus`` one. A fully
+    lowercase value is already the default the guideline asks for, so it is
+    never compared against the URLs and N8 stays silent for it. It replaces
+    N6 rather than adding to it, because the N6 text asks the packager to
+    follow the upstream spelling, which is the very thing this finding already
+    contradicts.
     """
     shown = ', '.join(f'"{spelling}"' for spelling in sorted(spellings))
     return [
@@ -614,17 +619,19 @@ def _check_spec_name_ext(
                 _subpackage_names(lines, resolved, macros),
             ),
         )
-        evidence: list[str] = []
-        if check_upstream_case:
-            evidence = _upstream_case_evidence(lines, macros, resolved)
-        spellings = _upstream_spellings(resolved, evidence)
-        confirmed = resolved in spellings
+        has_upper = any(char.isupper() for char in resolved)
+        spellings: set[str] = set()
         reported = False
-        if check_upstream_case and spellings and not confirmed:
-            messages.extend(_check_upstream_case(resolved, line, spellings))
-            reported = True
-        if check_case and not confirmed and not reported:
-            messages.extend(_check_case(resolved, line))
+        if check_upstream_case and has_upper:
+            evidence = _upstream_case_evidence(lines, macros, resolved)
+            spellings = _upstream_spellings(resolved, evidence)
+            if spellings and resolved not in spellings:
+                messages.extend(_check_upstream_case(resolved, line, spellings))
+                reported = True
+        if check_case and not reported:
+            confirmed = resolved in spellings
+            if not confirmed:
+                messages.extend(_check_case(resolved, line))
         if check_separator:
             messages.extend(_check_underscore(resolved, line))
 

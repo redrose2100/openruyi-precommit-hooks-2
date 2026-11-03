@@ -60,7 +60,7 @@ inspected.
 | 5 | Name conflict | A subpackage must not reuse the main package name, compared case-insensitively | A resolved `%package` name equals the main name | — | on |
 | 6 | Lowercase | The value should be lowercase unless the upstream name is capitalized | The value contains an uppercase letter and does not start with `perl-` or `python-` | `--no-check-case` | on |
 | 7 | Hyphen | The value should use `-` rather than `_` | The value contains `_` | `--check-separator` | off |
-| 8 | Source-URL case | The value should be spelled the way the project's own download URL spells it | No `Source` URL spells the value as written, but at least one spells it with a different case | `--no-check-upstream-case` | on |
+| 8 | Source-URL case | A capitalized value should be spelled the way the project's own download URL spells it | The value contains an uppercase letter, no `Source` URL spells it as written, but at least one spells it with a different case | `--no-check-upstream-case` | on |
 
 ### Scope notes
 
@@ -104,20 +104,13 @@ deliberately does not enforce. The measured counts come from a scan of the
   answered by evidence inside the spec instead of by a human. When a URL spells
   the value exactly, both checkpoints stay silent; when it spells another case,
   checkpoint 8 reports the mismatch and checkpoint 6 does **not** also fire,
-  because the two messages would contradict each other. Checkpoint 8 is
-  therefore bidirectional: it also catches a lowercase name against a
-  capitalized artefact, which checkpoint 6 could never see. The scan finds 22
-  such names —
-  `cunit`, `docbook2x`, `fp16`, `freerdp`, `fxdiv`, `imagemagick`, `imath`,
-  `judy`, `libidl`, `libraw`, `lmdb`, `lvm2`, `openblas`, `opencc`, `opensc`,
-  `opensp`, `orbit2`, `safeint`, `scons`, `spirv-llvm-translator`, `wavpack`
-  and `waybar` —
-  each of which is a current defect in the tree rather than an accepted
-  exception. `safeint` is a good illustration of why the `URL:` line has to be
-  expanded before it is trusted: it declares
-  `URL: https://github.com/dcleblanc/SafeInt` with a capitalized path and
-  `Source0: %{url}/archive/%{version}/SafeInt-%{version}.tar.gz`, so the
-  evidence only becomes visible once `%{url}` is bound.
+  because the two messages would contradict each other. Checkpoint 8 only fires
+  for a value that contains an uppercase letter: a fully lowercase value is
+  already the default the guideline asks for, so it is never compared against
+  the URLs. Within that scope it is bidirectional — it catches `Xwayland`
+  against a `xwayland` artefact and `Aflplusplus` against an `AFLplusplus`
+  one. A scan of the current tree finds exactly 2 such names, both on the
+  current tree:
 
 - **Checkpoint 8 reads `Source\d*` and nothing else.** The `URL:` line is
   deliberately excluded as evidence: a forge normalises that path to lower
@@ -136,12 +129,15 @@ deliberately does not enforce. The measured counts come from a scan of the
   for the unresolved name; it is a separate, opt-in command and is
   **not** registered as a hook.
 
-  With checkpoints 1 to 8 at their defaults the scan reports **26** findings
+  With checkpoints 1 to 8 at their defaults the scan reports **4** findings
   over the 6290-spec tree: the 1 checkpoint-4 finding, the 1 unresolved case
-  finding (`SDL2`) and the 24 checkpoint-8 findings. Passing
+  finding (`SDL2`) and the 2 checkpoint-8 findings. Passing
   `--no-check-upstream-case` reproduces the pre-checkpoint-8 behaviour — every
   uppercase name reported, no download URL consulted — 35 findings in total:
-  the 34 uppercase non-prefixed names plus the checkpoint-4 finding.
+  the 34 uppercase non-prefixed names plus the checkpoint-4 finding. A
+  lowercase name is never compared against the URLs, so the 22 reverse
+  mismatches that used to be reported (``cunit`` against ``CUnit``, ``openblas``
+  against ``OpenBLAS`` and the like) are silent now.
 
 - **Checkpoint 7 is off by default.** The scan finds 25 **resolved** main
   names containing `_`: `nss_wrapper`, `pam_wrapper`, `socket_wrapper`,
@@ -166,11 +162,13 @@ deliberately does not enforce. The measured counts come from a scan of the
   underscore or a CPAN/PyPI distribution name that does.
 
 - **Checkpoints 6 and 8 interact with checkpoint 7.** `--check-separator` is
-  orthogonal, so enabling it takes the default 26 to 51: the 25 underscore
-  names plus the 26. Adding `--no-check-case` brings that to 50, because
+  orthogonal, so enabling it takes the default 4 to 29: the 25 underscore
+  names plus the 4. Adding `--no-check-case` brings that to 28, because
   `SDL2` stops being reported by checkpoint 6 while the checkpoint-8 findings
   survive — a separator flag never silences a name whose download URL proves
-  the spelling wrong.
+  the spelling wrong. With both `--check-separator` and
+  `--no-check-upstream-case` the tree reports 60: the 34 uppercase names, the
+  25 underscore names and the checkpoint-4 finding.
 
 - `+` is treated as an **ordinary character**, not a separator. `libsigc++` is
   a legitimate C++ library whose upstream name contains `++`, and the separator
@@ -419,7 +417,7 @@ foo.spec: duplicate package name "foo" (line 4), already used by the main packag
 
 `libX11` is capitalized, but the spec's own `Source0` spells it the same way,
 so checkpoint 8 supplies the evidence checkpoint 6 was asking for and nothing
-is reported. This is the shape of the 30 accepted `libX*`, `Catch2`,
+is reported. This is the shape of the 31 accepted `libX*`, `Catch2`,
 `PackageKit`, `ModemManager`, `NetworkManager` and `SDL3` style names in the
 openRuyi tree.
 
@@ -445,10 +443,12 @@ Source0:        https://xorg.freedesktop.org/archive/individual/xserver/xwayland
 foo.spec: Name "Xwayland" (line 1) is not spelled the way its Source URLs do; upstream writes "xwayland"
 ```
 
-### Fail ❌ (name contradicts the download URL, other direction)
+### Pass ✅ (lowercase name, no URL comparison)
 
-The check is bidirectional, so a lowercase name against a capitalized artefact
-is reported too — the direct opposite of the `libX11` case above.
+A fully lowercase name already is the default the guideline asks for, so it is
+never compared against the download URLs. `openblas` downloads an `OpenBLAS`
+artefact, and the old rule reported the case mismatch; the current rule only
+compares a value that contains an uppercase letter, so this stays silent.
 
 ```spec
 Name:           openblas
@@ -456,8 +456,20 @@ Version:        0.3.31
 Source0:        https://github.com/OpenMathLib/OpenBLAS/archive/refs/tags/v0.3.31.tar.gz
 ```
 
+### Fail ❌ (uppercase name contradicts the download URL, other direction)
+
+A capitalized value that the `Source` URL spells with a different case is
+reported in either direction — here `Lvm2` against a `LVM2` artefact, the
+direct opposite of the `libX11` case above.
+
+```spec
+Name:           Lvm2
+Version:        2.03.35
+Source0:        https://sourceware.org/pub/lvm2/releases/LVM2.2.03.35.tgz
 ```
-foo.spec: Name "openblas" (line 1) is not spelled the way its Source URLs do; upstream writes "OpenBLAS"
+
+```
+foo.spec: Name "Lvm2" (line 1) is not spelled the way its Source URLs do; upstream writes "LVM2"
 ```
 
 ### Fail ❌ (uppercase, default flags)
