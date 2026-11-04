@@ -24,3 +24,21 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-version
+  name: check-spec-version
+  description: Ensure the spec Version field follows the version rules from the openRuyi packaging guidelines.
+  entry: check-spec-version
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
+
+- id: check-spec-release
+  name: check-spec-release
+  description: Ensure the spec Release field follows the release rules from the openRuyi packaging guidelines: it must be present and use %autorelease, must not hard-code a distribution suffix, and the %{dist} macro must not be overridden.
+  entry: check-spec-release
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
