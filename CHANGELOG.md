@@ -15,6 +15,25 @@
 
 ### Added
 
+- Fourth rule hook `check-spec-version`: validates the `Version` field
+  against the "Version" section and the "Versioning" chapter of the openRuyi
+  packaging guidelines — the field must be present and non-empty, the value
+  must not contain `-` or `_`, must not contain characters outside
+  `[A-Za-z0-9.+~]`, and the snapshot form (lowercase SCM tag + date +
+  revision) is recognised, with a macro-valued version escaping the content
+  checks.
+- Fifth rule hook `check-spec-release`: validates the `Release` field and the
+  `%{dist}` macro override against the openRuyi packaging guidelines — the
+  field must be present and non-empty, should use `%autorelease`, must not
+  hard-code a distribution suffix such as `.fc38` or `.el9`, and the `%{dist}`
+  macro must not be overridden with `%global dist` / `%define dist`.
+- Sixth rule hook `check-spec-summary`: validates the `Summary` field against
+  the openRuyi packaging guidelines — the field must be present and non-empty,
+  must not end with an English period, should be English only (American
+  English; any non-ASCII character is reported), and should stay brief (a
+  value longer than 300 characters is flagged as a heuristic). Subpackage
+  `Summary` lines inside `%package` blocks are checked as well, and a
+  macro-valued summary skips the content checkpoints.
 - Project scaffolding: `setup.cfg` / `setup.py` packaging configuration,
   `.pre-commit-hooks.yaml` public hooks manifest, `.pre-commit-config.yaml`
   bootstrap configuration.

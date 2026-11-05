@@ -39,13 +39,16 @@ files every time you run `git commit`. You can also run a single hook:
 $ pre-commit run check-spdx-header --all-files
 ```
 
-## Supported Hooks (3 in total)
+## Supported Hooks (5 in total)
 
 | # | Hook ID | Description | Rule Doc |
 | --- | --- | --- | --- |
 | 1 | `check-spdx-header` | Validates that spec files start with SPDX copyright and license declarations (ISCAS + openRuyi Contributors + MulanPSL-2.0) | [rules/check-spdx-header.md](rules/check-spdx-header.md) |
 | 2 | `check-spec-basic-fields` | Validates that spec files follow the openRuyi packaging guideline rules for the basic fields and sections | [rules/check-spec-basic-fields.md](rules/check-spec-basic-fields.md) |
 | 3 | `check-spec-name` | Validates that the spec `Name` field follows the openRuyi packaging guideline naming rules, including the case its own `Source` URLs use | [rules/check-spec-name.md](rules/check-spec-name.md) |
+| 4 | `check-spec-version` | Validates that the spec `Version` field follows the openRuyi packaging guideline versioning rules | [rules/check-spec-version.md](rules/check-spec-version.md) |
+| 5 | `check-spec-release` | Validates that the spec `Release` field follows the openRuyi packaging guideline release rules: it must be present and use `%autorelease`, must not hard-code a distribution suffix, and the `%{dist}` macro must not be overridden | [rules/check-spec-release.md](rules/check-spec-release.md) |
+| 6 | `check-spec-summary` | Validates that the spec `Summary` field follows the openRuyi packaging guideline summary rules: it must be present and non-empty, must not end with an English period, should be English only, and should stay brief | [rules/check-spec-summary.md](rules/check-spec-summary.md) |
 
 ## Standalone CLI Usage
 
@@ -56,6 +59,9 @@ run without pre-commit:
 $ check-spdx-header path/to/foo.spec
 $ check-spec-basic-fields path/to/foo.spec
 $ check-spec-name path/to/foo.spec
+$ check-spec-version path/to/foo.spec
+$ check-spec-release path/to/foo.spec
+$ check-spec-summary path/to/foo.spec
 ```
 
 An exit code of 1 means some files do not meet the requirements; 0 means

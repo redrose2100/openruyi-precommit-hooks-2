@@ -42,3 +42,12 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-summary
+  name: check-spec-summary
+  description: Ensure the spec Summary field follows the summary rules from the openRuyi packaging guidelines: it must be present and non-empty, must not end with an English period, should be English only, and should stay brief.
+  entry: check-spec-summary
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
