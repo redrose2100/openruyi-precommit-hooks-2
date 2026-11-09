@@ -29,9 +29,8 @@
   macro must not be overridden with `%global dist` / `%define dist`.
 - Sixth rule hook `check-spec-summary`: validates the `Summary` field against
   the openRuyi packaging guidelines — the field must be present and non-empty,
-  must not end with an English period, should be English only (American
-  English; any non-ASCII character is reported), and should stay brief (a
-  value longer than 300 characters is flagged as a heuristic). Subpackage
+  must not end with an English period, and should be English only (American
+  English; any non-ASCII character is reported). Subpackage
   `Summary` lines inside `%package` blocks are checked as well, and a
   macro-valued summary skips the content checkpoints.
 - Project scaffolding: `setup.cfg` / `setup.py` packaging configuration,

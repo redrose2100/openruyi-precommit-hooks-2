@@ -139,25 +139,11 @@ def test_ascii_punctuation_passes(tmp_path: Path) -> None:
     assert _findings(tmp_path, 'C/C++ bindings for libfoo (beta!)') == []
 
 
-# --- S4: brief description (heuristic) -------------------------------------
-
-
-def test_long_summary_is_reported(tmp_path: Path) -> None:
-    long_summary = 'A very long description ' + ('word ' * 80)
-    findings = _findings(tmp_path, long_summary)
-    assert len(findings) == 1, findings
-    assert 'characters; keep it under 300 (heuristic)' in findings[0], findings
-
-
-def test_brief_summary_passes(tmp_path: Path) -> None:
-    assert _findings(tmp_path, 'An example package for demonstration purposes') == []
-
-
 # --- macro escape -----------------------------------------------------------
 
 
 def test_macro_valued_summary_skips_content_checks(tmp_path: Path) -> None:
-    # S2-S4 are statically undecidable for a macro value; only S1 applies.
+    # S2-S3 are statically undecidable for a macro value; only S1 applies.
     assert _findings(tmp_path, '%{summary}') == []
 
 

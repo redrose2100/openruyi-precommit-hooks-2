@@ -48,7 +48,7 @@ $ pre-commit run check-spdx-header --all-files
 | 3 | `check-spec-name` | Validates that the spec `Name` field follows the openRuyi packaging guideline naming rules, including the case its own `Source` URLs use | [rules/check-spec-name.md](rules/check-spec-name.md) |
 | 4 | `check-spec-version` | Validates that the spec `Version` field follows the openRuyi packaging guideline versioning rules | [rules/check-spec-version.md](rules/check-spec-version.md) |
 | 5 | `check-spec-release` | Validates that the spec `Release` field follows the openRuyi packaging guideline release rules: it must be present and use `%autorelease`, must not hard-code a distribution suffix, and the `%{dist}` macro must not be overridden | [rules/check-spec-release.md](rules/check-spec-release.md) |
-| 6 | `check-spec-summary` | Validates that the spec `Summary` field follows the openRuyi packaging guideline summary rules: it must be present and non-empty, must not end with an English period, should be English only, and should stay brief | [rules/check-spec-summary.md](rules/check-spec-summary.md) |
+| 6 | `check-spec-summary` | Validates that the spec `Summary` field follows the openRuyi packaging guideline summary rules: it must be present and non-empty, must not end with an English period, and should be English only | [rules/check-spec-summary.md](rules/check-spec-summary.md) |
 
 ## Standalone CLI Usage
 

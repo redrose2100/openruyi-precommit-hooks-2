@@ -14,18 +14,16 @@ S1. ``Summary`` is present and non-empty.
 S2. The value must not end with an English period ``.``.
 S3. The value should be English only (American English); any non-ASCII
     character violates this checkpoint.
-S4. The value should stay a brief description; a value longer than 300
-    characters is flagged as a heuristic.
 
 A macro-valued summary such as ``Summary: %{summary}`` cannot be judged
-statically, so S2-S4 are skipped for it; S1 still fires when the field is
+statically, so S2-S3 are skipped for it; S1 still fires when the field is
 missing or empty. Subpackage ``Summary`` lines (inside ``%package``
 blocks) are covered by every checkpoint, exactly like the main package
 field.
 
 Everything that is not statically decidable is deliberately out of scope:
-judging whether a summary is "brief" below the heuristic bound, and
-judging whether an ASCII summary is grammatical American English.
+judging whether a summary is "brief", and judging whether an ASCII summary
+is grammatical American English.
 """
 from __future__ import annotations
 
@@ -42,13 +40,6 @@ _RE_SUMMARY = re.compile(r'^Summary\s*:\s*(.*)$')
 # A non-ASCII character: anything above U+007F. A summary that contains one
 # is not English-only (S3). ASCII punctuation is untouched by this check.
 _RE_NON_ASCII = re.compile(r'[^\x00-\x7F]')
-
-# Heuristic upper bound for a "brief" summary (S4). The guideline does not
-# give a number; 300 characters is a deliberately loose bound so that only
-# clearly oversized summaries are flagged. A scan of the openRuyi SPECS
-# tree (6290 specs) found that ordinary one-line descriptions run up to
-# roughly 200 characters, so the bound sits well above that.
-_MAX_SUMMARY_LENGTH = 300
 
 
 def _dedup(errors: list[str]) -> list[str]:
@@ -120,16 +111,6 @@ def _check_english(value: str, line: int) -> list[str]:
     return []
 
 
-def _check_brief(value: str, line: int) -> list[str]:
-    """S4: the value should stay brief (heuristic length bound)."""
-    if len(value) > _MAX_SUMMARY_LENGTH:
-        return [
-            f'Summary "{value[:40]}..." (line {line}) is {len(value)} '
-            f'characters; keep it under {_MAX_SUMMARY_LENGTH} (heuristic)',
-        ]
-    return []
-
-
 def _is_macro_value(value: str) -> bool:
     """True when the value still holds an unresolved ``%`` reference.
 
@@ -155,10 +136,9 @@ def _check_spec_summary(filename: str) -> list[str]:
         if not value:
             continue  # S1 already reported the empty value
         if _is_macro_value(value):
-            continue  # macro value: cannot statically judge S2-S4
+            continue  # macro value: cannot statically judge S2-S3
         errors.extend(_check_no_period(value, line))
         errors.extend(_check_english(value, line))
-        errors.extend(_check_brief(value, line))
 
     return _dedup([f'{filename}: {err}' for err in errors])
 

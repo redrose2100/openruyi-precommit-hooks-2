@@ -31,7 +31,6 @@ otherwise.
 | 1 | Presence | The spec must declare a non-empty `Summary` | No `Summary:` line, or the value is empty | — | on |
 | 2 | Trailing period | The value must not end with an English period `.` | The value ends with `.` (after stripping trailing whitespace) | — | on |
 | 3 | English only | The value should be English only (American English) | The value contains a non-ASCII character (anything above U+007F) | — | on |
-| 4 | Brief description | The value should stay brief | The value is longer than 300 characters | heuristic | on |
 
 ### Scope notes
 
@@ -46,15 +45,7 @@ behave.
   the fix suggested. ASCII text — including punctuation, digits and
   abbreviations such as `e.g.` — is never flagged by this checkpoint.
 
-- **Checkpoint 4 is a heuristic, not a hard limit.** The guideline asks for
-  a "brief" description but gives no number, so 300 characters is a
-  deliberately loose bound: only clearly oversized summaries are flagged.
-  The message says `(heuristic)` and prints the actual length so a packager
-  can judge whether the value is really too long. A scan of the openRuyi
-  `SPECS` tree (6290 specs) found that ordinary one-line descriptions run
-  up to roughly 200 characters, so the bound sits well above that.
-
-- **A macro-valued summary skips checkpoints 2-4.** `Summary:
+- **A macro-valued summary skips checkpoints 2-3.** `Summary:
   %{summary}`, `Summary: %{?summary}` and bare `%foo` all expand at build
   time, so the visible text is not the final value. The checkpoints that
   judge the text cannot decide statically and stay silent; checkpoint 1
@@ -79,10 +70,9 @@ behave.
   a static text check. The rule only rejects characters and shapes that are
   statically decidable.
 
-- **Not enforced: "brief" below the heuristic bound.** Any value between 1
-  and 120 characters passes checkpoint 4 even if it reads like a paragraph;
-  judging that needs a semantic decision this hook deliberately leaves to
-  the packager.
+- **Not enforced: how "brief" a summary is.** The guideline asks for a
+  brief description but gives no numeric bound; judging that needs a
+  semantic decision this hook deliberately leaves to the packager.
 
 - **Other fields are out of scope.** `Name` is enforced by
   `check-spec-name`, `Version` by `check-spec-version`, `Release` and the
