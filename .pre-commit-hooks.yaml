@@ -51,3 +51,12 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-license
+  name: check-spec-license
+  description: Ensure the spec License field follows the license rules from the openRuyi packaging guidelines: the value must be a valid SPDX license expression, every identifier must exist in the SPDX license list, and identifiers must use the canonical case.
+  entry: check-spec-license
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true

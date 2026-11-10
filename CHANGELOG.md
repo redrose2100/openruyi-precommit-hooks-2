@@ -33,6 +33,15 @@
   English; any non-ASCII character is reported). Subpackage
   `Summary` lines inside `%package` blocks are checked as well, and a
   macro-valued summary skips the content checkpoints.
+- Seventh rule hook `check-spec-license`: validates the `License` field
+  against the "License" section of the openRuyi packaging guidelines and the
+  linked license document. The value must parse as an SPDX license
+  expression (checked with a real parser, not a regular expression), every
+  identifier must exist in the SPDX license list, and identifiers must use
+  the canonical spelling. `LicenseRef-*` identifiers and macro values are
+  accepted, deprecated identifiers are accepted, and subpackage `License`
+  lines are checked as well. The SPDX data is vendored in
+  `openruyi_precommit_hooks/_spdx_ids.py` so the hook keeps working offline.
 - Project scaffolding: `setup.cfg` / `setup.py` packaging configuration,
   `.pre-commit-hooks.yaml` public hooks manifest, `.pre-commit-config.yaml`
   bootstrap configuration.

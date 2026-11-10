@@ -718,7 +718,7 @@ def _json_field(
 
 def _index_spelling(
     url: str,
-    token: str,
+    token: str | None,
     token_override: str,
     timeout: float = _HTTP_TIMEOUT,
 ) -> str | None:
