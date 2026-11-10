@@ -42,6 +42,16 @@
   accepted, deprecated identifiers are accepted, and subpackage `License`
   lines are checked as well. The SPDX data is vendored in
   `openruyi_precommit_hooks/_spdx_ids.py` so the hook keeps working offline.
+- Eighth rule hook `check-spec-url`: validates the `URL` field against the
+  "URL" section of the openRuyi packaging guidelines — the spec must set
+  `URL` to the package website or the project source URL, or write the
+  comment `# URL: No URL link available` with the `# URL:` prefix preserved;
+  the value must not be empty, must be an absolute `scheme://host` URL, and
+  must not be assembled from macros such as `%{name}` (percent escapes such
+  as `%2B` are URL encoding, not macros, and pass). The field must be spelled
+  `URL`; `--no-check-field-case` turns that checkpoint off. Subpackage `URL`
+  lines are checked as well, and field ordering stays with
+  `check-spec-basic-fields`.
 - Project scaffolding: `setup.cfg` / `setup.py` packaging configuration,
   `.pre-commit-hooks.yaml` public hooks manifest, `.pre-commit-config.yaml`
   bootstrap configuration.

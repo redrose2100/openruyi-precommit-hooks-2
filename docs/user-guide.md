@@ -39,7 +39,7 @@ files every time you run `git commit`. You can also run a single hook:
 $ pre-commit run check-spdx-header --all-files
 ```
 
-## Supported Hooks (7 in total)
+## Supported Hooks (8 in total)
 
 | # | Hook ID | Description | Rule Doc |
 | --- | --- | --- | --- |
@@ -50,6 +50,7 @@ $ pre-commit run check-spdx-header --all-files
 | 5 | `check-spec-release` | Validates that the spec `Release` field follows the openRuyi packaging guideline release rules: it must be present and use `%autorelease`, must not hard-code a distribution suffix, and the `%{dist}` macro must not be overridden | [rules/check-spec-release.md](rules/check-spec-release.md) |
 | 6 | `check-spec-summary` | Validates that the spec `Summary` field follows the openRuyi packaging guideline summary rules: it must be present and non-empty, must not end with an English period, and should be English only | [rules/check-spec-summary.md](rules/check-spec-summary.md) |
 | 7 | `check-spec-license` | Validates that the spec `License` field follows the openRuyi packaging guideline license rules: the value must be a valid SPDX license expression, every identifier must exist in the SPDX license list, and identifiers must use the canonical spelling | [rules/check-spec-license.md](rules/check-spec-license.md) |
+| 8 | `check-spec-url` | Validates that the spec `URL` field follows the openRuyi packaging guideline URL rules: the spec must set `URL` to the package website or the project source URL, or write the comment `# URL: No URL link available`; the value must be an absolute URL and must not be built from macros; the field must be spelled `URL` | [rules/check-spec-url.md](rules/check-spec-url.md) |
 
 ## Standalone CLI Usage
 
@@ -64,6 +65,7 @@ $ check-spec-version path/to/foo.spec
 $ check-spec-release path/to/foo.spec
 $ check-spec-summary path/to/foo.spec
 $ check-spec-license path/to/foo.spec
+$ check-spec-url path/to/foo.spec
 ```
 
 An exit code of 1 means some files do not meet the requirements; 0 means
