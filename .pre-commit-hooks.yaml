@@ -101,3 +101,20 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-source
+  name: check-spec-source
+  description: >-
+    Ensure the spec Source, SourceN and %sourcelist declarations follow the
+    source rules from the openRuyi packaging guidelines: every network source
+    needs an adjacent RemoteAsset comment carrying a sha256 checksum, a VCS
+    fetch also needs CreateArchive, sources must be numbered from 0 without
+    gaps, SourceForge URLs must use downloads.sourceforge.net, the tarball
+    name must be derivable from the URL, and the field must be spelled Source
+    or SourceN. Use --no-check-field-case to skip the spelling rule and
+    --no-check-index-sequence to allow numbering gaps.
+  entry: check-spec-source
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true

@@ -39,7 +39,7 @@ files every time you run `git commit`. You can also run a single hook:
 $ pre-commit run check-spdx-header --all-files
 ```
 
-## Supported Hooks (9 in total)
+## Supported Hooks (10 in total)
 
 | # | Hook ID | Description | Rule Doc |
 | --- | --- | --- | --- |
@@ -52,6 +52,7 @@ $ pre-commit run check-spdx-header --all-files
 | 7 | `check-spec-license` | Validates that the spec `License` field follows the openRuyi packaging guideline license rules: the value must be a valid SPDX license expression, every identifier must exist in the SPDX license list, and identifiers must use the canonical spelling | [rules/check-spec-license.md](rules/check-spec-license.md) |
 | 8 | `check-spec-url` | Validates that the spec `URL` field follows the openRuyi packaging guideline URL rules: the spec must set `URL` to the package website or the project source URL, or write the comment `# URL: No URL link available`; the value must be an absolute URL and must not be built from macros; the field must be spelled `URL` | [rules/check-spec-url.md](rules/check-spec-url.md) |
 | 9 | `check-spec-vcs` | Validates that the spec `VCS` field follows the openRuyi packaging guideline VCS rules: `VCS` may be omitted only when `URL` is already a source repository link, and is required otherwise, either as a cloneable address or as the comment `# VCS: No VCS link available`; the value must be cloneable and must not be built from macros; the field must be spelled `VCS` | [rules/check-spec-vcs.md](rules/check-spec-vcs.md) |
+| 10 | `check-spec-source` | Validates that the spec `Source` / `SourceN` / `%sourcelist` declarations follow the openRuyi packaging guideline source rules: every network source needs an adjacent `#!RemoteAsset:` carrying a sha256 checksum, a VCS fetch also needs `#!CreateArchive`, indices must run from 0 without gaps, SourceForge URLs must use `downloads.sourceforge.net`, the tarball name must be derivable from the URL, and the field must be spelled `Source` / `SourceN` | [rules/check-spec-source.md](rules/check-spec-source.md) |
 
 ## Standalone CLI Usage
 
@@ -68,6 +69,7 @@ $ check-spec-summary path/to/foo.spec
 $ check-spec-license path/to/foo.spec
 $ check-spec-url path/to/foo.spec
 $ check-spec-vcs path/to/foo.spec
+$ check-spec-source path/to/foo.spec
 ```
 
 An exit code of 1 means some files do not meet the requirements; 0 means

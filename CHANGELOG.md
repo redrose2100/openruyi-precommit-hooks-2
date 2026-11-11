@@ -68,6 +68,24 @@
   `--no-check-field-case` turns that checkpoint off. Subpackage `VCS` lines
   are checked as well, and `VCS` stays silent when `URL` is missing, empty or
   macro-built, because `check-spec-url` already owns those defects.
+- Tenth rule hook `check-spec-source`: validates `Source`, `SourceN` and
+  `%sourcelist` against the "Source" section of the openRuyi packaging
+  guidelines and the linked "SourceURL" supplement. A source fetched over
+  `http`/`https` needs an adjacent `#!RemoteAsset:` comment, that comment must
+  carry a 64-digit `sha256:` checksum, and a VCS fetch (`git+`, `git:`,
+  `svn:`, ...) additionally needs `#!CreateArchive` between the comment and
+  the `Source` line; `#!CreateArchive` must never travel alone. Two
+  declarations must not resolve to the same index (`Source` and `Source0` are
+  both index 0), a value must not be empty, `#!RemoteAsset:` must not be
+  orphaned, `SourceN` indices must run from 0 without gaps, SourceForge URLs
+  must use `downloads.sourceforge.net`, the tarball name must be derivable
+  from the URL (a trailing `/` or a query string with no `#/name` fragment is
+  reported), and the field must be spelled `Source` or `SourceN`.
+  `%sourcelist` must stand alone on its line and be followed by at least one
+  file name. `--no-check-field-case` and `--no-check-index-sequence` turn the
+  two stylistic checkpoints off. Local source names and overall field order
+  stay out of scope, and `#!RemoteAsset`/`#!CreateArchive` comments that
+  annotate `Patch` or `Icon` lines belong to their own fields.
 - Project scaffolding: `setup.cfg` / `setup.py` packaging configuration,
   `.pre-commit-hooks.yaml` public hooks manifest, `.pre-commit-config.yaml`
   bootstrap configuration.
