@@ -85,3 +85,19 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-vcs
+  name: check-spec-vcs
+  description: >-
+    Ensure the spec VCS field follows the VCS rules from the openRuyi packaging
+    guidelines: VCS may be omitted only when URL already names the source
+    repository, and is required otherwise, either as a cloneable address or as
+    the placeholder comment; the value must be a clone URL and must not be
+    built from macros; the field must be spelled VCS. Use
+    --no-check-field-case to skip the spelling rule and --no-check-doc-site to
+    accept a documentation or package-index URL without VCS.
+  entry: check-spec-vcs
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true

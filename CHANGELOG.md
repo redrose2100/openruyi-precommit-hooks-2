@@ -52,6 +52,22 @@
   `URL`; `--no-check-field-case` turns that checkpoint off. Subpackage `URL`
   lines are checked as well, and field ordering stays with
   `check-spec-basic-fields`.
+- Ninth rule hook `check-spec-vcs`: validates the `VCS` field against the
+  "VCS" section of the openRuyi packaging guidelines — `VCS` may be omitted
+  only when `URL` already points at the source repository, and is required
+  otherwise, either as a cloneable address or as the comment
+  `# VCS: No VCS link available` with the `# VCS:` prefix preserved. The
+  value must not be empty, must not be assembled from macros such as
+  `%{name}` (percent escapes are URL encoding and pass), and must be
+  cloneable, accepting an absolute URL (`git://`, `https://`, `ssh://`,
+  `svn://`), the same URL behind a version-control prefix (`git:https://...`),
+  or an scp-like `user@host:path`. Documentation and package-index hosts
+  (`*.github.io`, `*.readthedocs.io`, `crates.io`, `metacpan.org`,
+  `pypi.org`, ...) count as non-repository URLs; `--no-check-doc-site`
+  accepts them without `VCS`. The field must be spelled `VCS`;
+  `--no-check-field-case` turns that checkpoint off. Subpackage `VCS` lines
+  are checked as well, and `VCS` stays silent when `URL` is missing, empty or
+  macro-built, because `check-spec-url` already owns those defects.
 - Project scaffolding: `setup.cfg` / `setup.py` packaging configuration,
   `.pre-commit-hooks.yaml` public hooks manifest, `.pre-commit-config.yaml`
   bootstrap configuration.
