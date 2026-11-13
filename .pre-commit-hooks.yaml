@@ -153,3 +153,21 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-patch-patchlist
+  name: check-spec-patch-patchlist
+  description: >-
+    Ensure spec patch declarations follow the openRuyi Patch and %patchlist
+    rules: every declaration group has one comment line above it, every patch
+    file name starts with four digits in the documented 0001-2999 ranges,
+    more than three patches imply %patchlist, the list sits above
+    %description, and the Patch field sits above BuildOption or
+    BuildRequires. A spec without a patch is never reported. Use
+    --no-check-comment to skip the comment rule, --no-check-naming to skip
+    the naming rules, --no-check-patchlist to skip the list rules and
+    --no-check-position to skip the position rule.
+  entry: check-spec-patch-patchlist
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true

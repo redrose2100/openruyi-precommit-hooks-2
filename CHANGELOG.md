@@ -133,6 +133,35 @@
   is never reported, because the field is optional; the position checkpoints
   stay silent when the block has no source declaration or no `BuildSystem`;
   and a `%package` subpackage block restarts the field model.
+- Thirteenth rule hook `check-spec-patch-patchlist`: validates the `Patch`,
+  `PatchN` and `%patchlist` declarations against the "Patch and %patchlist
+  (optional)" section of the openRuyi packaging guidelines and the dedicated
+  "Patch" supplement. Every declaration group needs one comment line above
+  it; every patch file name needs a leading four digit type prefix inside
+  `0001`-`2999`; more than three patches imply a `%patchlist`; the list must
+  sit above `%description`; and the `Patch` field must sit above
+  `BuildOption`, or above `BuildRequires` when no `BuildOption` is written.
+  A macro value, a reference without a `.patch` or `.diff` suffix and a path
+  prefix are skipped by the naming checkpoints, because the name is either
+  build-time only or not a patch file at all. The prefix is only checked for
+  its shape: deciding whether a patch is really upstream, a backport or
+  package specific needs the patch payload, and comparing the `PatchN` index
+  with the file name prefix is excluded because the kernel style
+  deliberately differs.
+  Provenance note: only the naming and the `%patchlist` position
+  checkpoints use the MUST wording. The comment checkpoint uses SHOULD, the
+  `Patch` position checkpoint rests on a SHOULD sentence of the supplement
+  plus the base field relative-order list, and the "more than three patches"
+  threshold is advisory wording. The comment checkpoint is evaluated per
+  contiguous group rather than per entry, matching the supplement sample
+  where one comment covers a run of file names, and its "a patch that
+  explains itself needs no comment" exemption is not applied because that
+  needs the patch payload.
+  `--no-check-comment`, `--no-check-naming`, `--no-check-patchlist` and
+  `--no-check-position` turn the comment, naming, list and position
+  checkpoints off. A spec that declares no patch is never reported, and the
+  position checkpoint stays silent when the spec writes neither
+  `BuildOption` nor `BuildRequires`.
 - Project scaffolding: `setup.cfg` / `setup.py` packaging configuration,
   `.pre-commit-hooks.yaml` public hooks manifest, `.pre-commit-config.yaml`
   bootstrap configuration.

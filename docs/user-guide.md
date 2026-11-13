@@ -39,7 +39,7 @@ files every time you run `git commit`. You can also run a single hook:
 $ pre-commit run check-spec-header --all-files
 ```
 
-## Supported Hooks (12 in total)
+## Supported Hooks (13 in total)
 
 | # | Hook ID | Description | Rule Doc |
 | --- | --- | --- | --- |
@@ -55,6 +55,7 @@ $ pre-commit run check-spec-header --all-files
 | 10 | `check-spec-source` | Validates that the spec `Source` / `SourceN` / `%sourcelist` declarations follow the openRuyi packaging guideline source rules: every network source needs an adjacent `#!RemoteAsset:` carrying a sha256 checksum, a VCS fetch also needs `#!CreateArchive`, indices must run from 0 without gaps, SourceForge URLs must use `downloads.sourceforge.net`, the tarball name must be derivable from the URL, and the field must be spelled `Source` / `SourceN` | [rules/check-spec-source.md](rules/check-spec-source.md) |
 | 11 | `check-spec-buildarch` | Validates that the optional spec `BuildArch` field follows the openRuyi packaging guideline placement rules: it is written after the last source declaration and before `BuildSystem`, at most once per package block, carries one bare lower-case architecture token or a macro, is spelled `BuildArch`, and a `noarch` block must not key an installed path off the build host | [rules/check-spec-buildarch.md](rules/check-spec-buildarch.md) |
 | 12 | `check-spec-buildsystem` | Validates that the optional spec `BuildSystem` field follows the openRuyi declarative build system clauses: it is spelled `BuildSystem`, is not empty, carries one literal lower-case build system name, is written at most once per package block, sits after the last source declaration, and sits after `BuildArch` and before `BuildRequires` | [rules/check-spec-buildsystem.md](rules/check-spec-buildsystem.md) |
+| 13 | `check-spec-patch-patchlist` | Validates that spec patch declarations follow the openRuyi `Patch` and `%patchlist` rules: every declaration group has one comment line above it, every patch file name starts with four digits in the documented `0001`-`2999` ranges, more than three patches imply `%patchlist`, the list sits above `%description`, and the `Patch` field sits above `BuildOption` or `BuildRequires` | [rules/check-spec-patch-patchlist.md](rules/check-spec-patch-patchlist.md) |
 
 ## Standalone CLI Usage
 
@@ -74,6 +75,7 @@ $ check-spec-vcs path/to/foo.spec
 $ check-spec-source path/to/foo.spec
 $ check-spec-buildarch path/to/foo.spec
 $ check-spec-buildsystem path/to/foo.spec
+$ check-spec-patch-patchlist path/to/foo.spec
 ```
 
 An exit code of 1 means some files do not meet the requirements; 0 means
