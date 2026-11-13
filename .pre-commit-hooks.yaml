@@ -118,3 +118,20 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-buildarch
+  name: check-spec-buildarch
+  description: >-
+    Ensure the spec BuildArch field follows the build architecture rules from
+    the openRuyi packaging guidelines: the field is spelled BuildArch, carries
+    one bare lowercase architecture token, is written at most once per field
+    block, sits after the last Source, SourceN or %sourcelist declaration and
+    before BuildSystem, and does not make a noarch block depend on the build
+    architecture. The field is conditional, so a spec without it is never
+    reported. Use --no-check-field-case to skip the spelling rule and
+    --no-check-noarch to skip the noarch rule.
+  entry: check-spec-buildarch
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true

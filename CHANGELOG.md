@@ -96,6 +96,23 @@
   two stylistic checkpoints off. Local source names and overall field order
   stay out of scope, and `#!RemoteAsset`/`#!CreateArchive` comments that
   annotate `Patch` or `Icon` lines belong to their own fields.
+- Eleventh rule hook `check-spec-buildarch`: validates the optional
+  `BuildArch` field against the "BuildArch (optional)" clause of the openRuyi
+  packaging guidelines. The field must be spelled `BuildArch`, must not be
+  empty, must carry a single bare lower-case architecture token such as
+  `noarch` or `x86_64` (a macro value escapes the value checks), must be
+  declared at most once per package block, must be written after the last
+  `Source` / `SourceN` / `%sourcelist` of its block and before `BuildSystem`,
+  and a `noarch` block must not key an installed path off the build host via
+  `%{_libdir}`, `%{_lib}`, `%{_lib64}`, `%{_arch}`, `%{_target_cpu}`,
+  `%{_host_cpu}` or `%{_target_platform}`.
+  `--no-check-field-case` and `--no-check-noarch` turn the two stylistic
+  checkpoints off. A spec that writes no `BuildArch` is never reported,
+  because the field is optional; the position checkpoints stay silent when
+  the block has no source declaration or no `BuildSystem`; a `%package`
+  subpackage block restarts the field model; and the `%{?_isa}` conditional
+  form never counts as architecture evidence because it expands to nothing on
+  a `noarch` build.
 - Project scaffolding: `setup.cfg` / `setup.py` packaging configuration,
   `.pre-commit-hooks.yaml` public hooks manifest, `.pre-commit-config.yaml`
   bootstrap configuration.
