@@ -476,12 +476,16 @@ def _check_index_sequence(
     sources: list[SourceDecl],
 ) -> list[str]:
     """S9: ``SourceN`` indices should start at 0 and increase by one."""
-    known = [(name, line) for name, _, number, line in sources
-             if number is not None]
+    known = [
+        (name, line) for name, _, number, line in sources
+        if number is not None
+    ]
     if not known:
         return []
-    numbers = sorted({number for _, _, number, _ in sources
-                      if number is not None})
+    numbers = sorted({
+        number for _, _, number, _ in sources
+        if number is not None
+    })
     expected = list(range(numbers[-1] + 1))
     if numbers == expected:
         return []

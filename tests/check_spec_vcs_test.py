@@ -60,9 +60,9 @@ def _spec(*fields: str, url: str = 'https://example.org/foo') -> str:
         'Name:           foo\n'
         'Version:        1.0\n'
         'Release:        %autorelease\n'
-        f'URL:            {url}\n'
-        + ''.join(f'{field}\n' for field in fields)
-        + '\n'
+        f'URL:            {url}\n' +
+        ''.join(f'{field}\n' for field in fields) +
+        '\n'
         '%description\n'
         'An example package.\n'
     )

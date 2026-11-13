@@ -955,8 +955,10 @@ def test_main_accepts_no_check_upstream_case(tmp_path: Path) -> None:
 
 
 def test_main_parses_the_verification_flags() -> None:
-    assert main(['--verify-upstream', '--upstream-workers', '2',
-                 '--upstream-timeout', '0.5']) == 0
+    assert main([
+        '--verify-upstream', '--upstream-workers', '2',
+        '--upstream-timeout', '0.5',
+    ]) == 0
 
 
 # --- macro-valued names -----------------------------------------------------
@@ -1098,9 +1100,9 @@ def _doc_examples() -> list[tuple[str, str, bool, bool, bool, list[str]]]:
         expected: list[str] = []
         following = index + 1
         while (
-            following < len(lines)
-            and not lines[following].strip().startswith('```')
-            and not lines[following].startswith('#')
+            following < len(lines) and
+            not lines[following].strip().startswith('```') and
+            not lines[following].startswith('#')
         ):
             following += 1
         if following < len(lines) and lines[following].strip() == '```':

@@ -68,9 +68,9 @@ def _spec(*fields: str, url: str = 'https://example.org/foo') -> str:
         'Name:           foo\n'
         'Version:        1.0\n'
         'Release:        %autorelease\n'
-        f'URL:            {url}\n'
-        + ''.join(f'{field}\n' for field in fields)
-        + '\n'
+        f'URL:            {url}\n' +
+        ''.join(f'{field}\n' for field in fields) +
+        '\n'
         '%description\n'
         'An example package.\n'
     )
@@ -180,8 +180,10 @@ def test_empty_source_value(tmp_path: Path) -> None:
 def test_empty_numbered_source_value(tmp_path: Path) -> None:
     content = _spec('Source2:        ')
     findings = _findings(tmp_path, content)
-    assert any('Source2 field' in finding and 'is empty' in finding
-               for finding in findings)
+    assert any(
+        'Source2 field' in finding and 'is empty' in finding
+        for finding in findings
+    )
 
 
 # --- S3: RemoteAsset presence ----------------------------------------------
@@ -201,8 +203,10 @@ def test_remote_asset_separated_by_blank_line(tmp_path: Path) -> None:
         'Source0:        https://example.org/foo-1.0.tar.gz',
     )
     findings = _findings(tmp_path, content)
-    assert any('is a network source but has no' in finding
-               for finding in findings)
+    assert any(
+        'is a network source but has no' in finding
+        for finding in findings
+    )
 
 
 def test_remote_asset_after_source_does_not_count(tmp_path: Path) -> None:
@@ -211,8 +215,10 @@ def test_remote_asset_after_source_does_not_count(tmp_path: Path) -> None:
         f'#!RemoteAsset:  sha256:{SHA}',
     )
     findings = _findings(tmp_path, content)
-    assert any('is a network source but has no' in finding
-               for finding in findings)
+    assert any(
+        'is a network source but has no' in finding
+        for finding in findings
+    )
 
 
 def test_ftp_source_needs_no_remote_asset(tmp_path: Path) -> None:
@@ -332,8 +338,10 @@ def test_git_protocol_remote_asset_without_create_archive(
         'Source0:        foo-%{version}.tar.gz',
     )
     findings = _findings(tmp_path, content)
-    assert any('so "#!CreateArchive" must come' in finding
-               for finding in findings)
+    assert any(
+        'so "#!CreateArchive" must come' in finding
+        for finding in findings
+    )
 
 
 def test_svn_remote_asset_without_create_archive(tmp_path: Path) -> None:
@@ -342,8 +350,10 @@ def test_svn_remote_asset_without_create_archive(tmp_path: Path) -> None:
         'Source0:        foo-%{version}.tar.gz',
     )
     findings = _findings(tmp_path, content)
-    assert any('so "#!CreateArchive" must come' in finding
-               for finding in findings)
+    assert any(
+        'so "#!CreateArchive" must come' in finding
+        for finding in findings
+    )
 
 
 def test_https_remote_asset_needs_no_create_archive(tmp_path: Path) -> None:
@@ -363,8 +373,10 @@ def test_create_archive_without_remote_asset(tmp_path: Path) -> None:
         'Source0:        foo-%{version}.tar.gz',
     )
     findings = _findings(tmp_path, content)
-    assert any('must come directly after the "#!RemoteAsset:"' in finding
-               for finding in findings)
+    assert any(
+        'must come directly after the "#!RemoteAsset:"' in finding
+        for finding in findings
+    )
 
 
 def test_create_archive_without_source(tmp_path: Path) -> None:
@@ -374,8 +386,10 @@ def test_create_archive_without_source(tmp_path: Path) -> None:
         'BuildSystem:    cmake',
     )
     findings = _findings(tmp_path, content)
-    assert any('must come directly before the Source line' in finding
-               for finding in findings)
+    assert any(
+        'must come directly before the Source line' in finding
+        for finding in findings
+    )
 
 
 def test_create_archive_with_blank_line_before_source(
@@ -388,8 +402,10 @@ def test_create_archive_with_blank_line_before_source(
         'Source0:        foo-%{version}.tar.gz',
     )
     findings = _findings(tmp_path, content)
-    assert any('must come directly before the Source line' in finding
-               for finding in findings)
+    assert any(
+        'must come directly before the Source line' in finding
+        for finding in findings
+    )
 
 
 # --- S7: orphan RemoteAsset -------------------------------------------------
@@ -411,8 +427,10 @@ def test_remote_asset_before_patch_is_orphan(tmp_path: Path) -> None:
         'Patch0:         foo-fix.patch',
     )
     findings = _findings(tmp_path, content)
-    assert any('does not annotate a Source line' in finding
-               for finding in findings)
+    assert any(
+        'does not annotate a Source line' in finding
+        for finding in findings
+    )
 
 
 def test_remote_asset_above_create_archive_is_not_orphan(
@@ -613,15 +631,19 @@ def test_sourcelist_with_argument(tmp_path: Path) -> None:
         'bar.conf',
     )
     findings = _findings(tmp_path, content)
-    assert any('must be written alone on its line' in finding
-               for finding in findings)
+    assert any(
+        'must be written alone on its line' in finding
+        for finding in findings
+    )
 
 
 def test_sourcelist_without_entries(tmp_path: Path) -> None:
     content = _spec('%sourcelist')
     findings = _findings(tmp_path, content)
-    assert any('is not followed by any file' in finding
-               for finding in findings)
+    assert any(
+        'is not followed by any file' in finding
+        for finding in findings
+    )
 
 
 def test_sourcelist_before_a_section(tmp_path: Path) -> None:
@@ -636,8 +658,10 @@ def test_sourcelist_before_a_section(tmp_path: Path) -> None:
         'An example package.\n'
     )
     findings = _findings(tmp_path, content)
-    assert any('is not followed by any file' in finding
-               for finding in findings)
+    assert any(
+        'is not followed by any file' in finding
+        for finding in findings
+    )
 
 
 # --- scope boundaries ------------------------------------------------------

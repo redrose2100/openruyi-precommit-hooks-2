@@ -39,13 +39,14 @@ N8. A capitalized value is spelled the way the project's own download URL
     spells it. A ``Source`` URL names the released artefact, so it is upstream
     proof for N6: when the artefact spells the name exactly, both checkpoints
     stay silent, and when it differs, N8 reports the mismatch instead of N6.
-    Only the ``Source\\d*`` lines are read; the ``URL`` line is excluded because
-    a forge normalises that path to lower case while the tarball keeps the real
-    spelling. N8 only fires for a value that contains an uppercase letter: a
-    fully lowercase value already is the default the guideline asks for, so it
-    is never compared against the URLs. It is still bidirectional within that
-    scope: it catches ``Name: Xwayland`` against an ``xwayland-24.1.11.tar.xz``
-    artefact and ``Name: Aflplusplus`` against an ``AFLplusplus`` one.
+    Only the ``Source\\d*`` lines are read; the ``URL`` line is excluded
+    because a forge normalises that path to lower case while the tarball keeps
+    the real spelling. N8 only fires for a value that contains an uppercase
+    letter: a fully lowercase value already is the default the guideline asks
+    for, so it is never compared against the URLs. It is still bidirectional
+    within that scope: it catches ``Name: Xwayland`` against an
+    ``xwayland-24.1.11.tar.xz`` artefact and ``Name: Aflplusplus`` against an
+    ``AFLplusplus`` one.
     ``--no-check-upstream-case`` disables N8 and restores the evidence-free N6
     result.
 
@@ -105,11 +106,11 @@ _BAD_SEQUENCES: tuple[str, ...] = (
 # names carrying this prefix.
 _PERL_PREFIX = 'perl-'
 
-# A Python library source package must be named with a "python-" prefix (the
-# guideline's module-package section: "主要包含 Python 库的源码包必须以
-# ``python-`` 前缀命名"). The rest of the name is the upstream PyPI spelling,
-# which may legitimately be capitalized (e.g. ``python-Whoosh``), so N6 skips
-# names carrying this prefix just like it does for ``perl-``.
+# A Python library source package must be named with a "python-" prefix: the
+# guideline's module-package section requires it. The rest of the name is the
+# upstream PyPI spelling, which may legitimately be capitalized (e.g.
+# ``python-Whoosh``), so N6 skips names carrying this prefix just like it does
+# for ``perl-``.
 _PYTHON_PREFIX = 'python-'
 
 # Matches a "Source", "Source0" or "Source12" line and captures the value.
@@ -370,12 +371,12 @@ def _find_url(lines: list[str]) -> str | None:
 def _builtin_tags(lines: list[str], name: str) -> dict[str, str]:
     """Return the RPM builtins a ``Source`` value may reference.
 
-    ``%{name}``, ``%{version}`` and ``%{url}`` are builtins fed by the ``Name``,
-    ``Version`` and ``URL`` tags rather than by ``%global``, so a Source such as
-    ``%{url}/releases/individual/lib/%{name}-%{version}.tar.xz`` only expands
-    when they are bound here. ``%{url}`` is bound for expansion only; the
-    ``URL`` tag itself is never read as evidence, because a forge normalises
-    that path to lower case while the tarball keeps the real spelling.
+    ``%{name}``, ``%{version}`` and ``%{url}`` are builtins fed by the
+    ``Name``, ``Version`` and ``URL`` tags rather than by ``%global``, so a
+    Source such as ``%{url}/lib/%{name}-%{version}.tar.xz`` only expands when
+    they are bound here. ``%{url}`` is bound for expansion only; the ``URL``
+    tag itself is never read as evidence, because a forge normalises that path
+    to lower case while the tarball keeps the real spelling.
     """
     builtins: dict[str, str] = {}
     version = _find_version(lines)
@@ -626,7 +627,9 @@ def _check_spec_name_ext(
             evidence = _upstream_case_evidence(lines, macros, resolved)
             spellings = _upstream_spellings(resolved, evidence)
             if spellings and resolved not in spellings:
-                messages.extend(_check_upstream_case(resolved, line, spellings))
+                messages.extend(
+                    _check_upstream_case(resolved, line, spellings),
+                )
                 reported = True
         if check_case and not reported:
             confirmed = resolved in spellings
@@ -706,7 +709,9 @@ def _json_field(
         request.add_header('Authorization', f'Bearer {token}')
     try:
         with urllib.request.urlopen(request, timeout=timeout) as reply:
-            payload: object = json.loads(reply.read().decode('utf-8', 'replace'))
+            payload: object = json.loads(
+                reply.read().decode('utf-8', 'replace'),
+            )
     except (urllib.error.URLError, OSError, ValueError):
         return None
     for part in field.split('.'):
@@ -926,7 +931,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         type=float,
         default=_HTTP_TIMEOUT,
         metavar='SECONDS',
-        help=f'socket timeout used by --verify-upstream (default: {_HTTP_TIMEOUT:g})',
+        help=(
+            'socket timeout used by --verify-upstream '
+            f'(default: {_HTTP_TIMEOUT:g})'
+        ),
     )
     args = parser.parse_args(argv)
 
