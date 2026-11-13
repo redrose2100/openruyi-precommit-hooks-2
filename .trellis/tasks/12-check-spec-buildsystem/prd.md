@@ -38,8 +38,8 @@ From <https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines/#buildsyst
 ### Source B — base field section, SHOULD level
 
 > When the following fields are present they should appear in this relative
-> order: Name, Version, Release, Summary, License, URL, VCS, Source,
-> BuildArch, BuildSystem, Patch, BuildOption, BuildRequires, ...
+> order, which includes Source, then BuildArch, then BuildSystem, then
+> Patch, then BuildOption, then BuildRequires.
 
 > The numbered forms Source, Source0 and Source1 are the same position, and
 > the equivalent `%sourcelist` form also belongs to the source declaration

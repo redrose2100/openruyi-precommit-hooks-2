@@ -37,9 +37,9 @@ Source: the base field section of the same page, specifically its
 The base field section lists the relative order that fields should follow
 when they are present:
 
-> When the following fields are present they should appear in this
-> relative order: Name, Version, Release, Summary, License, URL, VCS,
-> Source, BuildArch, BuildSystem, Patch, BuildOption, BuildRequires, ...
+> When the following fields are present they should appear in this relative
+> order, which includes Source, then BuildArch, then BuildSystem, then
+> Patch, then BuildOption, then BuildRequires.
 
 and it defines what counts as one source declaration:
 
