@@ -82,7 +82,7 @@ _OPERATORS = ('AND', 'OR')
 _WITH = 'WITH'
 
 # Minimum difflib similarity for suggesting a spelling. Same threshold and same
-# helper shape as check_spdx_header, where it separates a one-character typo
+# helper shape as check_spec_header, where it separates a one-character typo
 # from an unrelated token.
 _SPELLING_MATCH_THRESHOLD = 0.9
 

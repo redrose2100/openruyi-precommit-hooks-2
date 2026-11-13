@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from openruyi_precommit_hooks.check_spdx_header import _check_spdx_header
-from openruyi_precommit_hooks.check_spdx_header import main
+from openruyi_precommit_hooks.check_spec_header import _check_spec_header
+from openruyi_precommit_hooks.check_spec_header import main
 
 VALID_SPEC = """\
 # SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
@@ -145,7 +145,7 @@ Version:        1.0
     ],
 )
 def test_ok_header(tmp_path: Path, content: str, filename: str) -> None:
-    errors = _check_spdx_header(_write(tmp_path, filename, content))
+    errors = _check_spec_header(_write(tmp_path, filename, content))
     assert errors == []
 
 
@@ -485,7 +485,7 @@ def test_bad_header(
     output; an entry prefixed with ``!`` must NOT appear.
     """
     path = _write(tmp_path, 'bad.spec', content)
-    errors = _check_spdx_header(path)
+    errors = _check_spec_header(path)
     if isinstance(expected, str):
         assert errors == [f'{path}: {expected}']
         return

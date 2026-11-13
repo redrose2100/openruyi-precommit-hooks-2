@@ -1,6 +1,6 @@
-# check-spdx-header
+# check-spec-header
 
-> Rule ID: `check-spdx-header`
+> Rule ID: `check-spec-header`
 
 ## Original Requirement
 
@@ -105,13 +105,13 @@ Add to `.pre-commit-config.yaml`:
 -   repo: https://github.com/openRuyi-Project/openruyi-precommit-hooks
     rev: v0.1.0   # use the latest tag
     hooks:
-    -   id: check-spdx-header
+    -   id: check-spec-header
 ```
 
 It can also be used as a standalone command:
 
 ```console
-$ check-spdx-header path/to/foo.spec
+$ check-spec-header path/to/foo.spec
 ```
 
 An exit code of 1 means some files do not meet the requirements; 0 means

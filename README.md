@@ -14,7 +14,7 @@ Add this repository to your `.pre-commit-config.yaml`:
 -   repo: https://github.com/openRuyi-Project/openruyi-precommit-hooks
     rev: v0.1.0  # replace with the version you want to use
     hooks:
-    -   id: check-spdx-header
+    -   id: check-spec-header
 ```
 
 Then run:

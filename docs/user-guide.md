@@ -22,7 +22,7 @@ project:
 -   repo: https://github.com/openRuyi-Project/openruyi-precommit-hooks
     rev: v0.1.0  # replace with the version you want to use
     hooks:
-    -   id: check-spdx-header
+    -   id: check-spec-header
 ```
 
 Then install the git hooks and run the checks:
@@ -36,14 +36,14 @@ After that, pre-commit automatically runs the configured hooks on staged
 files every time you run `git commit`. You can also run a single hook:
 
 ```console
-$ pre-commit run check-spdx-header --all-files
+$ pre-commit run check-spec-header --all-files
 ```
 
 ## Supported Hooks (10 in total)
 
 | # | Hook ID | Description | Rule Doc |
 | --- | --- | --- | --- |
-| 1 | `check-spdx-header` | Validates that spec files start with SPDX copyright and license declarations (ISCAS + openRuyi Contributors + MulanPSL-2.0) | [rules/check-spdx-header.md](rules/check-spdx-header.md) |
+| 1 | `check-spec-header` | Validates that spec files start with SPDX copyright and license declarations (ISCAS + openRuyi Contributors + MulanPSL-2.0) | [rules/check-spec-header.md](rules/check-spec-header.md) |
 | 2 | `check-spec-basic-fields` | Validates that spec files follow the openRuyi packaging guideline rules for the basic fields and sections | [rules/check-spec-basic-fields.md](rules/check-spec-basic-fields.md) |
 | 3 | `check-spec-name` | Validates that the spec `Name` field follows the openRuyi packaging guideline naming rules, including the case its own `Source` URLs use | [rules/check-spec-name.md](rules/check-spec-name.md) |
 | 4 | `check-spec-version` | Validates that the spec `Version` field follows the openRuyi packaging guideline versioning rules | [rules/check-spec-version.md](rules/check-spec-version.md) |
@@ -60,7 +60,7 @@ Each hook also provides a standalone command-line entry point, so it can be
 run without pre-commit:
 
 ```console
-$ check-spdx-header path/to/foo.spec
+$ check-spec-header path/to/foo.spec
 $ check-spec-basic-fields path/to/foo.spec
 $ check-spec-name path/to/foo.spec
 $ check-spec-version path/to/foo.spec

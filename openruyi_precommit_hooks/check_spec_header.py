@@ -136,7 +136,7 @@ def _dedup(errors: list[str]) -> list[str]:
     return out
 
 
-def _check_spdx_header(filename: str) -> list[str]:
+def _check_spec_header(filename: str) -> list[str]:
     errors: list[str] = []
     try:
         with open(filename, encoding='utf-8') as f:
@@ -262,7 +262,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     retv = 0
     for filename in args.filenames:
-        for err in _check_spdx_header(filename):
+        for err in _check_spec_header(filename):
             print(err)
             retv = 1
     return retv

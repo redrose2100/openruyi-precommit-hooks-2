@@ -1,5 +1,15 @@
 # CHANGELOG
 
+### Changed
+
+- Renamed the SPDX header rule from `check-spdx-header` to
+  `check-spec-header` so every rule ID uses the `check-spec-*` prefix. The
+  module moved to `openruyi_precommit_hooks/check_spec_header.py` (helper
+  `_check_spec_header`), the rule doc to `docs/rules/check-spec-header.md`,
+  and the test to `tests/check_spec_header_test.py`. The old hook ID is no
+  longer registered, so existing `.pre-commit-config.yaml` files must update
+  `id: check-spdx-header` to `id: check-spec-header`.
+
 ### Fixed
 
 - `check-spec-basic-fields`: no longer reports `missing required section
@@ -91,7 +101,7 @@
   bootstrap configuration.
 - Test infrastructure: `tests/`, plus `tox.ini`, `requirements-dev.txt`,
   GitHub Actions CI.
-- First rule hook `check-spdx-header`: validates that spec files start with
+- First rule hook `check-spec-header`: validates that spec files start with
   SPDX copyright and license declarations (ISCAS + openRuyi Project
   Contributors + `SPDX-License-Identifier: MulanPSL-2.0`); the contributor
   line is optional; the `SPDX-License-Identifier` line terminates the header
