@@ -18,6 +18,13 @@ messages.
 
 ## Normative sources
 
+The six checkpoints do not all come from `#buildsystem`. That section covers
+only the value of the field and uses the MUST / MUST NOT wording. Three
+further places in the guidelines supply the order and duplication
+checkpoints, and they use weaker wording. Each source is listed separately.
+
+### Source A — `#buildsystem`, MUST level
+
 From <https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines/#buildsystem>:
 
 1. A spec that uses the RPM declarative build system mechanism must declare
@@ -28,27 +35,54 @@ From <https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines/#buildsyst
 4. When `BuildSystem` is present its value must name a supported
    declarative build system.
 
-From <https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines/BuildSystems>:
+### Source B — base field section, SHOULD level
 
-- `BuildOption(<stage>):` must be separated from its arguments by exactly
-  two spaces.
-- `BuildOption` sits between `BuildSystem` and `BuildRequires`.
+> When the following fields are present they should appear in this relative
+> order: Name, Version, Release, Summary, License, URL, VCS, Source,
+> BuildArch, BuildSystem, Patch, BuildOption, BuildRequires, ...
 
-From `#buildarch` and the base field order section:
+> The numbered forms Source, Source0 and Source1 are the same position, and
+> the equivalent `%sourcelist` form also belongs to the source declaration
+> block.
 
-- `BuildArch` sits between the last `Source` field and the `BuildSystem`
-  field.
+This gives S5 and the "before `BuildRequires`" half of S6.
+
+### Source C — `BuildArch` section, SHOULD level
+
+> The BuildArch field should appear between the last Source field and the
+> BuildSystem field.
+
+This gives the "after `BuildArch`" half of S6.
+
+### Source D — supplement `BuildSystems`, advisory
+
+> In the simplest case the spec file only needs to contain one build system
+> declaration field.
+
+This is the only basis for S4. It is advisory rather than normative, so S4
+is the weakest checkpoint.
 
 ## Checkpoints
 
-| ID | Checkpoint | Source |
-| --- | --- | --- |
-| S1 | The field is spelled `BuildSystem` | field naming |
-| S2 | The value is present | clause 3 |
-| S3 | The value is one literal lowercase build system name | clause 4 |
-| S4 | A field block declares the field at most once | clause 1 |
-| S5 | The field sits after the last source declaration of its block | field order |
-| S6 | The field sits after `BuildArch` and before `BuildRequires` | field order |
+| ID | Checkpoint | Source | Strength |
+| --- | --- | --- | --- |
+| S1 | The field is spelled `BuildSystem` | A (implied) | error |
+| S2 | The value is present | A clause 3 | error |
+| S3 | The value is one literal lowercase build system name | A clause 4 | error |
+| S4 | A field block declares the field at most once | D | error |
+| S5 | The field sits after the last source declaration of its block | B | error |
+| S6 | The field sits after `BuildArch` and before `BuildRequires` | B and C | error |
+
+## Known deviation from the letter of the guidelines
+
+S1, S4, S5 and S6 are stricter than a literal reading, because the guideline
+wording is SHOULD or advisory while the hook reports them as errors.
+The decision was taken deliberately and is documented in
+`docs/rules/check-spec-buildsystem.md`: the findings are concrete defects in
+the spec that ships, they need no build-time knowledge, and the corpus shows
+the offending blocks were being edited anyway, so the fix is local.
+`--no-check-field-case` and `--no-check-position` let a team opt out of S1,
+S5 and S6. S4 has no opt-out flag.
 
 ## Explicitly out of scope
 

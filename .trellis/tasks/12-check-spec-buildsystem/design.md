@@ -66,14 +66,25 @@ So S3 produces two distinct messages but counts as one checkpoint.
 
 ## S4 duplicate declaration
 
+Provenance: advisory only, from the `BuildSystems` supplement sentence that
+in the simplest case a spec "only needs to contain one build system
+declaration field". No clause in `#buildsystem` mentions duplicates, so this
+is the weakest of the six checkpoints.
+
 Inside one field block, every occurrence of the field (matched
 case-insensitively) is counted. More than one occurrence is reported with
 all line numbers. In the openRuyi corpus,
 `go-github-rcrowley-go-metrics.spec` declares the field twice inside one
 block, which is a genuine mistake rather than a legitimate per-branch
-declaration, so limiting the check to one block is correct.
+declaration, so limiting the check to one block is correct. There is no
+opt-out flag, because a duplicated declaration corrupts the spec data rather
+than a style preference.
 
 ## S5 position after the last source declaration
+
+Provenance: SHOULD level, from the base field relative-order list, which puts
+`Source` before `BuildSystem` and defines `SourceN` and `%sourcelist` as the
+same position as `Source`. Disabled by `--no-check-position`.
 
 The check collects every `Source` / `SourceN` field line plus every
 `%sourcelist` macro line of the block and takes the maximum. A field written
@@ -82,6 +93,11 @@ silent, because the clause constrains the relative position of two present
 fields.
 
 ## S6 position between BuildArch and BuildRequires
+
+Provenance: SHOULD level, from two sentences. The base field relative-order
+list gives the "before `BuildRequires`" half and the `BuildArch` section
+sentence gives the "after `BuildArch`" half. Disabled by
+`--no-check-position`.
 
 Two independent sub-checks:
 

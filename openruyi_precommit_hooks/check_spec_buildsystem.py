@@ -10,7 +10,8 @@ The packaging guidelines define the ``BuildSystem`` field in four clauses:
 4. When ``BuildSystem`` is present its value must name a supported
    declarative build system.
 
-The rule checks six things, all of them statically:
+Those four clauses use the MUST / MUST NOT wording and only govern the
+value of the field. The rule checks six things, all of them statically:
 
 * S1 - the field is spelled ``BuildSystem``.
 * S2 - the value is present.
@@ -18,6 +19,23 @@ The rule checks six things, all of them statically:
 * S4 - a field block declares the field at most once.
 * S5 - the field sits after the last source declaration of its block.
 * S6 - the field sits after ``BuildArch`` and before ``BuildRequires``.
+
+S1, S4, S5 and S6 are stricter than a literal reading of the guidelines, and
+each one is worth naming the provenance of:
+
+* S1 rests on the ``BuildSystem`` section title and on every sample line in
+  the guidelines, which spell the field as one word. No clause says so
+  explicitly.
+* S4 rests on the ``BuildSystems`` supplement, which says that the simplest
+  spec only needs "one build system declaration field". That sentence is
+  advisory rather than normative, so the rule treats a second declaration
+  as a defect of the spec data rather than of its style.
+* S5 and S6 rest on two SHOULD-level sentences. The base field order
+  section lists ``Source`` before ``BuildSystem`` and ``BuildSystem`` before
+  ``BuildRequires``, and it defines ``SourceN`` and ``%sourcelist`` as the
+  same position as ``Source``. The ``BuildArch`` section says that
+  ``BuildArch`` sits between the last source field and ``BuildSystem``,
+  which is where the "after ``BuildArch``" half of S6 comes from.
 
 Deliberately out of scope, each because the clause does not reach it or
 because the judgement is not static: the field is conditional, so a missing

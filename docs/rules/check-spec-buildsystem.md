@@ -2,6 +2,15 @@
 
 ## Original Requirement
 
+The six checkpoints of this rule do **not** all come from the
+`#buildsystem` section. That section only governs the field's value. The
+three order and duplication checkpoints are derived from three other
+places in the guidelines, and they rest on the weaker SHOULD strength
+rather than the MUST / MUST NOT strength. Each is listed separately below
+so the provenance is unambiguous.
+
+### Source A — `#buildsystem` (value clauses, MUST level)
+
 Source: <https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines/#buildsystem>
 
 The packaging guidelines define the `BuildSystem` field in four clauses:
@@ -17,28 +26,95 @@ The packaging guidelines define the `BuildSystem` field in four clauses:
    build system. The usable names and their requirements are defined by the
    supplement `BuildSystems`.
 
+Clauses 1 to 4 use the MUST / MUST NOT wording, so S2 and S3 enforce the
+hard requirements of this field.
+
+### Source B — base field section relative order (SHOULD level)
+
+Source: the base field section of the same page, specifically its
+"relative order" list of base fields.
+
+The base field section lists the relative order that fields should follow
+when they are present:
+
+> When the following fields are present they should appear in this
+> relative order: Name, Version, Release, Summary, License, URL, VCS,
+> Source, BuildArch, BuildSystem, Patch, BuildOption, BuildRequires, ...
+
+and it defines what counts as one source declaration:
+
+> The numbered forms Source, Source0 and Source1 are the same position, and
+> the equivalent `%sourcelist` form also belongs to the source declaration
+> block.
+
+The wording is SHOULD, not MUST. From this list the rule derives:
+
+- S5 — `BuildSystem` comes after the source declaration block, so it
+  should indeed sit after the **last** `Source` / `SourceN` /
+  `%sourcelist` of its block.
+- The `BuildSystem` before `BuildRequires` half of S6.
+
+### Source C — `BuildArch` section (SHOULD level)
+
+Source: the optional `BuildArch` subsection of the base field section.
+
+> The BuildArch field should appear between the last Source field and the
+> BuildSystem field.
+
+Also SHOULD. From this sentence the rule derives the `BuildSystem` after
+`BuildArch` half of S6.
+
+### Source D — supplement `BuildSystems` (advisory wording)
+
 Source: <https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines/BuildSystems>
 
-- `BuildOption(<stage>):` must be separated from its arguments by exactly
-  two spaces, and the stage name must be written out.
-- `BuildOption` sits between `BuildSystem` and `BuildRequires`, and repeated
-  options follow the RPM build order.
+> In the simplest case the spec file only needs to contain one build
+> system declaration field, for example `BuildSystem: autotools`.
 
-Source: `#buildarch` and the base field order section
+The sentence says "only needs", which is advisory and does not spell out a
+rule for duplicate declarations. S4 is therefore the weakest checkpoint of
+the six, justified only by this sentence plus the general principle that
+one field carries one value.
 
-- `BuildArch` sits between the last `Source` field and the `BuildSystem`
-  field.
+### Strength summary
+
+| Checkpoint | Source | Guideline strength |
+| --- | --- | --- |
+| S2 value present | A clause 3 | MUST NOT |
+| S3 value is a supported name | A clause 4 | MUST |
+| S1 spelling | A section title and usage | implied, no explicit clause |
+| S4 at most one declaration | D | advisory ("only needs") |
+| S5 after the last source | B | SHOULD |
+| S6 after `BuildArch`, before `BuildRequires` | B and C | SHOULD |
+
+S1, S4, S5 and S6 are therefore stricter than a literal reading of the
+guidelines. They stay enabled by default because a misspelled field name, a
+duplicated declaration and a misplaced field are all concrete defects in
+the spec that ships, and the corpus shows that every project writing the
+field out of order was editing that block anyway, so the fixes are local.
+
+A team that wants only the hard requirements can opt out of part of this:
+
+| Flag | Disables |
+| --- | --- |
+| `--no-check-field-case` | S1 |
+| `--no-check-value` | S2 and S3 |
+| `--no-check-position` | S5 and S6 |
+
+S4 has no opt-out flag, because a duplicated declaration is a data-integrity
+problem rather than a style choice and it is the cheapest of the six checks
+to satisfy.
 
 ## Checkpoints
 
-| ID | Checkpoint | Clause |
-| --- | --- | --- |
-| S1 | The field is spelled `BuildSystem` | field naming |
-| S2 | The value is present | clause 3 |
-| S3 | The value is one literal lowercase build system name | clause 4 |
-| S4 | A field block declares the field at most once | clause 1 |
-| S5 | The field sits after the last source declaration of its block | field order |
-| S6 | The field sits after `BuildArch` and before `BuildRequires` | field order |
+| ID | Checkpoint | Source | Strength |
+| --- | --- | --- | --- |
+| S1 | The field is spelled `BuildSystem` | A (implied) | error |
+| S2 | The value is present | A clause 3 | error |
+| S3 | The value is one literal lowercase build system name | A clause 4 | error |
+| S4 | A field block declares the field at most once | D | error |
+| S5 | The field sits after the last source declaration of its block | B | error |
+| S6 | The field sits after `BuildArch` and before `BuildRequires` | B and C | error |
 
 ### Scope notes
 

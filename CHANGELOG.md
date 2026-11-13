@@ -116,13 +116,23 @@
   `%sourcelist` of its block, and must sit after `BuildArch` and before
   `BuildRequires`. The main spec does not maintain the list of usable build
   system names, so only the shape of the value is checked.
-  `--no-check-field-case` and `--no-check-noarch` turn the two stylistic
-  checkpoints off. A spec that writes no `BuildArch` is never reported,
-  because the field is optional; the position checkpoints stay silent when
-  the block has no source declaration or no `BuildSystem`; a `%package`
-  subpackage block restarts the field model; and the `%{?_isa}` conditional
-  form never counts as architecture evidence because it expands to nothing on
-  a `noarch` build.
+  Provenance note: only the empty-value and supported-name checkpoints come
+  from the `#buildsystem` clause, which uses the MUST / MUST NOT wording.
+  The spelling checkpoint rests on the section title and on the sample lines.
+  The single-declaration checkpoint rests on the `BuildSystems` supplement
+  sentence that the simplest spec "only needs to contain one build system
+  declaration field", which is advisory. The two order checkpoints rest on
+  the base field relative-order list and on the `BuildArch` section, both of
+  which use the SHOULD wording. They stay enabled by default because each
+  finding is a concrete defect in the spec that ships and needs no
+  build-time knowledge.
+  `--no-check-field-case`, `--no-check-value` and `--no-check-position` turn
+  the spelling, value and order checkpoints off. The single-declaration
+  checkpoint has no flag, because a duplicated declaration corrupts the spec
+  data rather than a style preference. A spec that writes no `BuildSystem`
+  is never reported, because the field is optional; the position checkpoints
+  stay silent when the block has no source declaration or no `BuildSystem`;
+  and a `%package` subpackage block restarts the field model.
 - Project scaffolding: `setup.cfg` / `setup.py` packaging configuration,
   `.pre-commit-hooks.yaml` public hooks manifest, `.pre-commit-config.yaml`
   bootstrap configuration.
