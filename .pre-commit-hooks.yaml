@@ -135,3 +135,21 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-buildsystem
+  name: check-spec-buildsystem
+  description: >-
+    Ensure the spec BuildSystem field follows the declarative build system
+    rules from the openRuyi packaging guidelines: the field is spelled
+    BuildSystem, carries one literal lowercase build system name rather than
+    an empty value or a macro reference, is written at most once per field
+    block, sits after the last Source, SourceN or %sourcelist declaration,
+    and sits after BuildArch and before BuildRequires. The field is
+    conditional, so a spec without it is never reported. Use
+    --no-check-field-case to skip the spelling rule, --no-check-value to
+    skip the value rules and --no-check-position to skip the position rules.
+  entry: check-spec-buildsystem
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true

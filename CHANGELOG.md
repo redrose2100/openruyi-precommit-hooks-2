@@ -106,6 +106,16 @@
   and a `noarch` block must not key an installed path off the build host via
   `%{_libdir}`, `%{_lib}`, `%{_lib64}`, `%{_arch}`, `%{_target_cpu}`,
   `%{_host_cpu}` or `%{_target_platform}`.
+- Twelfth rule hook `check-spec-buildsystem`: validates the optional
+  `BuildSystem` field against the "BuildSystem" clause of the openRuyi
+  packaging guidelines. The field must be spelled `BuildSystem`, must not be
+  empty, must carry a single literal lower-case build system name such as
+  `autotools`, `cmake` or `rustcrates` (a macro value is reported because the
+  field names a fixed keyword), must be declared at most once per package
+  block, must be written after the last `Source` / `SourceN` /
+  `%sourcelist` of its block, and must sit after `BuildArch` and before
+  `BuildRequires`. The main spec does not maintain the list of usable build
+  system names, so only the shape of the value is checked.
   `--no-check-field-case` and `--no-check-noarch` turn the two stylistic
   checkpoints off. A spec that writes no `BuildArch` is never reported,
   because the field is optional; the position checkpoints stay silent when

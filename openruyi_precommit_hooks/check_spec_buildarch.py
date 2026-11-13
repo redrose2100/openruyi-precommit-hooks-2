@@ -31,13 +31,12 @@ legitimate in a ``noarch`` subpackage of a multi-architecture spec. No
 network access and no ``rpm`` invocation is performed, so the rule works on a
 bare checkout.
 """
-
 from __future__ import annotations
 
 import argparse
 import re
+from collections.abc import Sequence
 from typing import NamedTuple
-from typing import Sequence
 
 
 # Any top-level "Field: value" line. The name is captured verbatim so that
@@ -181,7 +180,6 @@ def _blocks_of(lines: list[str]) -> list[_Block]:
     raw: list[tuple[int | None, int, list[tuple[str, str, int]]]] = []
     first_field: int | None = None
     fields: list[tuple[str, str, int]] = []
-    start = 0
     ended = False
 
     for index, line in enumerate(lines):
@@ -191,7 +189,6 @@ def _blocks_of(lines: list[str]) -> list[_Block]:
                 raw.append((first_field, index, fields))
                 first_field = None
                 fields = []
-                start = index + 1
                 ended = False
                 continue
             if not ended:
