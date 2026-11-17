@@ -365,8 +365,10 @@ def _check_spec_patch_patchlist_ext(
             if name is not None:
                 errors.extend(_check_prefix(name, line))
 
-    resolved = [_PatchEntry(line, _patch_file_name(value))
-                for line, value in fields]
+    resolved = [
+        _PatchEntry(line, _patch_file_name(value))
+        for line, value in fields
+    ]
     for entries in list_entries:
         resolved.extend(
             _PatchEntry(line, _patch_file_name(token))

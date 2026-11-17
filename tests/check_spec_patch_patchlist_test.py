@@ -769,8 +769,8 @@ def test_corpus_cdparanoia_reports_the_missing_prefix() -> None:
         str(CORPUS / 'cdparanoia' / 'cdparanoia.spec'),
     )
     assert any(
-        'cdparanoia-10.2-endian.patch' in err
-        and 'does not start with four digits' in err
+        'cdparanoia-10.2-endian.patch' in err and
+        'does not start with four digits' in err
         for err in errors
     ), errors
 
