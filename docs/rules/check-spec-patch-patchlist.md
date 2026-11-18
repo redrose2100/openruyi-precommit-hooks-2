@@ -70,8 +70,10 @@ Source: the base field section of the main guidelines page.
 > order, which includes Source, then BuildArch, then BuildSystem, then
 > Patch, then BuildOption, then BuildRequires.
 
-This is the second basis for P6 and the reason the window closes on
-`BuildOption` when the spec writes one and on `BuildRequires` otherwise.
+This is the second basis for P6. It supplies both bounds: the window opens
+on `BuildSystem`, the field that precedes `Patch` in the list, and closes
+on `BuildOption` when the spec writes one and on `BuildRequires`
+otherwise.
 
 ### Strength summary
 
@@ -81,7 +83,7 @@ This is the second basis for P6 and the reason the window closes on
 | P3 prefix lies in `0001`-`2999` | A clause 2, B | MUST |
 | P5 `%patchlist` above `%description` | A clause 3, B | MUST |
 | P1 comment above every group | A clause 1, B | SHOULD |
-| P6 `Patch` above `BuildOption` / `BuildRequires` | B, C | SHOULD |
+| P6 `Patch` below `BuildSystem`, above `BuildOption` / `BuildRequires` | B, C | SHOULD |
 | P4 more than three patches imply a list | A clause 3 | advisory |
 
 The rule reports every checkpoint as an error by default. The two advisory
@@ -104,7 +106,7 @@ each has its own opt-out flag:
 | P3 | That four digit prefix lies in `0001`-`2999` | A clause 2, B | error |
 | P4 | More than three patches imply a `%patchlist` | A clause 3 | error |
 | P5 | `%patchlist` sits above the first `%description` | A clause 3, B | error |
-| P6 | `Patch` sits above `BuildOption`, or above `BuildRequires` | B, C | error |
+| P6 | `Patch` sits below `BuildSystem` and above `BuildOption`, or above `BuildRequires` | B, C | error |
 
 ### P1 comment above every declaration group
 
@@ -170,14 +172,26 @@ package description and the anchor the clause names.
 
 ### P6 `Patch` position
 
-The window closes on `BuildOption` when the spec writes one, and on
-`BuildRequires` otherwise. A spec that writes neither is silent, because
-the clause constrains the position of two present fields.
+The documented window has **two** bounds, and the rule checks both. It
+opens on `BuildSystem` and closes on `BuildOption` when the spec writes
+one, or on `BuildRequires` otherwise. A bound the spec does not write is
+silent, because the clause constrains the position only relative to fields
+that are present.
+
+The opening bound comes from Source C: the base field relative order list
+places `Patch` after `BuildSystem`, and the supplement repeats that a spec
+without `BuildOption` writes `Patch` between `BuildSystem` and
+`BuildRequires`. Without this bound, a `Patch` written above `BuildSystem`
+was accepted even though the closing bound was satisfied, which is the
+layout of 14 files in the corpus, for example `compsize.spec` and
+`libunwind.spec`.
 
 The **first** `Patch` is compared, because a spec that repeats the field
 once per patch satisfies the clause as soon as the earliest one is inside
 the window. `BuildOption(prep): -p0` also counts as a `BuildOption`, since
-it carries the same field name with a stage argument.
+it carries the same field name with a stage argument. The opening bound is
+the **first** `BuildSystem`: a spec that writes one per subpackage keeps
+the main block first, so later occurrences never move the window.
 
 ## Scope notes
 

@@ -290,6 +290,32 @@ An example package.
 %autochangelog
 """
 
+# The first Patch sits above BuildSystem, which is the other side of the
+# documented window, so P6 reports it as well.
+PATCH_BEFORE_BUILD_SYSTEM_SPEC = """\
+Name:           foo
+Version:        1.0
+Release:        %autorelease
+Summary:        Example package
+License:        MulanPSL-2.0
+URL:            https://example.org/foo
+
+Source0:        https://example.org/foo-%{version}.tar.gz
+# Adjust the tests for the newer setuptools.
+Patch0:         0001-adjusts-tests-for-setuptools.patch
+BuildSystem:    autotools
+BuildRequires:  gcc
+
+%description
+An example package.
+
+%files
+%license LICENSE
+
+%changelog
+%autochangelog
+"""
+
 # A patch value that is only resolvable at build time must not be reported
 # as a badly named patch file.
 MACRO_VALUE_SPEC = """\
@@ -472,6 +498,11 @@ def test_passing_specs(
             'Patch (line 12) must be written above BuildRequires (line 10)',
             id='patch-after-buildrequires',
         ),
+        pytest.param(
+            PATCH_BEFORE_BUILD_SYSTEM_SPEC,
+            'Patch (line 10) must be written below BuildSystem (line 11)',
+            id='patch-before-buildsystem',
+        ),
     ],
 )
 def test_failing_specs(
@@ -631,6 +662,57 @@ def test_patch_position_ignored_without_boundary(tmp_path: Path) -> None:
 
 def test_patch_above_boundary_passes(tmp_path: Path) -> None:
     filename = _write(tmp_path, 'foo.spec', CLEAN_SPEC)
+    assert _check_spec_patch_patchlist(filename) == []
+
+
+def test_patch_before_build_system_is_reported(tmp_path: Path) -> None:
+    """The window opens on BuildSystem, so an earlier Patch is reported."""
+    filename = _write(tmp_path, 'foo.spec', PATCH_BEFORE_BUILD_SYSTEM_SPEC)
+    errors = _check_spec_patch_patchlist(filename)
+    assert errors
+    assert 'must be written below BuildSystem' in errors[0], errors
+
+
+def test_patch_before_build_system_is_not_reported_twice(
+    tmp_path: Path,
+) -> None:
+    """A Patch above BuildSystem is inside the lower bound, so one error."""
+    filename = _write(tmp_path, 'foo.spec', PATCH_BEFORE_BUILD_SYSTEM_SPEC)
+    errors = _check_spec_patch_patchlist(filename)
+    assert len([err for err in errors if 'Patch (line' in err]) == 1, errors
+
+
+def test_patch_window_needs_a_build_system(tmp_path: Path) -> None:
+    """Without BuildSystem there is no lower bound to compare against."""
+    content = CLEAN_SPEC.replace('BuildSystem:    autotools\n', '')
+    filename = _write(tmp_path, 'foo.spec', content)
+    assert _check_spec_patch_patchlist(filename) == []
+
+
+def test_later_patch_may_cross_the_lower_bound(tmp_path: Path) -> None:
+    """Only the earliest Patch is compared, so a second one may follow it."""
+    content = CLEAN_SPEC.replace(
+        'BuildRequires:  gcc\n',
+        'BuildRequires:  gcc\n'
+        '# Local change, not intended for upstream.\n'
+        'Patch1:         0001-local-change.patch\n',
+    )
+    filename = _write(tmp_path, 'foo.spec', content)
+    assert _check_spec_patch_patchlist(filename) == []
+
+
+def test_subpackage_build_system_does_not_move_the_window(
+    tmp_path: Path,
+) -> None:
+    """A later BuildSystem belongs to another block and is not the bound."""
+    content = CLEAN_SPEC.replace(
+        '%description\nAn example package.\n',
+        '%description\nAn example package.\n\n'
+        '%package -n foo-devel\n'
+        'Summary:        Development files\n'
+        'BuildSystem:    autotools\n',
+    )
+    filename = _write(tmp_path, 'foo.spec', content)
     assert _check_spec_patch_patchlist(filename) == []
 
 

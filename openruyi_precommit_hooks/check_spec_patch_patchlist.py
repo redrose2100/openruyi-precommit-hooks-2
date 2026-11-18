@@ -9,7 +9,8 @@ dedicated ``Patch`` supplement page. Together they supply five checkpoints:
 * P3 - that four digit prefix lies in ``0001``-``2999``.
 * P4 - more than three patches imply ``%patchlist``.
 * P5 - ``%patchlist`` sits above ``%description``.
-* P6 - ``Patch`` sits above ``BuildOption``, or above ``BuildRequires``.
+* P6 - ``Patch`` sits below ``BuildSystem`` and above ``BuildOption``, or
+  above ``BuildRequires``.
 
 The strength of the underlying wording differs, so each checkpoint names its
 source:
@@ -30,7 +31,8 @@ source:
 * P6 is SHOULD level. The supplement says the field should be written above
   ``BuildOption`` if present or above ``BuildRequires``, and the base field
   relative order list of the main guidelines puts ``Patch`` between
-  ``BuildSystem`` and ``BuildOption``.
+  ``BuildSystem`` and ``BuildOption``. The same list supplies the lower
+  bound, so a ``Patch`` written above ``BuildSystem`` is reported too.
 
 Deliberately out of scope, each because the clause does not reach it or
 because the judgement is not static: whether a patch is actually applied
@@ -85,6 +87,10 @@ RE_MACRO = re.compile(r'%\{[^{}]*\}')
 # "BuildOption" field may carry an argument, as in "BuildOption(prep): -p0".
 RE_BUILD_OPTION = re.compile(r'^BuildOption\s*[:(]')
 RE_BUILD_REQUIRES = re.compile(r'^BuildRequires\s*:')
+
+# The field that opens the documented position window of "Patch": the base
+# field order places "Patch" after "BuildSystem".
+RE_BUILD_SYSTEM = re.compile(r'^BuildSystem\s*:')
 
 # The section that the "%patchlist" block has to precede.
 RE_DESCRIPTION = re.compile(r'^%description\b')
@@ -303,29 +309,49 @@ def _check_patch_position(
     lines: list[str],
     fields: list[tuple[int, str]],
 ) -> list[str]:
-    """P6: the first ``Patch`` sits above its documented boundary.
+    """P6: ``Patch`` sits inside its documented position window.
 
-    The window closes on ``BuildOption`` when the spec writes one, and on
-    ``BuildRequires`` otherwise. A spec that writes neither is silent,
-    because the clause constrains the position relative to those fields.
-    The first ``Patch`` is compared, since a spec that repeats the field
-    once per patch satisfies the clause as soon as the earliest one is
-    inside the window.
+    The clause has two bounds. The window opens on ``BuildSystem``: the
+    base field order puts ``Patch`` after it, and the supplement repeats
+    that a spec without ``BuildOption`` writes ``Patch`` between
+    ``BuildSystem`` and ``BuildRequires``. It closes on ``BuildOption``
+    when the spec writes one, and on ``BuildRequires`` otherwise.
+
+    A bound that the spec does not write is silent, because the clause
+    constrains the position only relative to fields that are present. The
+    first ``Patch`` is compared against the first occurrence of each bound,
+    so a spec that repeats the field once per patch satisfies the clause as
+    soon as the earliest declaration is inside the window.
     """
     if not fields:
         return []
+    errors: list[str] = []
+
+    # Opening bound: a Patch written above BuildSystem is outside the
+    # window. Comparing against the first occurrence is enough, because a
+    # spec that writes BuildSystem once per subpackage keeps the main block
+    # first.
     first = min(line for line, _value in fields)
+    opens = _first_line(lines, RE_BUILD_SYSTEM)
+    if opens is not None and first < opens:
+        errors.append(
+            f'Patch (line {first}) must be written below BuildSystem '
+            f'(line {opens})',
+        )
+
+    # Bottom bound: the first Patch must precede the closing field.
     anchor = _first_line(lines, RE_BUILD_OPTION)
     label = 'BuildOption'
     if anchor is None:
         anchor = _first_line(lines, RE_BUILD_REQUIRES)
         label = 'BuildRequires'
-    if anchor is None or first < anchor:
-        return []
-    return [
-        f'Patch (line {first}) must be written above {label} '
-        f'(line {anchor})',
-    ]
+    if anchor is not None and first > anchor:
+        errors.append(
+            f'Patch (line {first}) must be written above {label} '
+            f'(line {anchor})',
+        )
+
+    return errors
 
 
 def _check_spec_patch_patchlist_ext(

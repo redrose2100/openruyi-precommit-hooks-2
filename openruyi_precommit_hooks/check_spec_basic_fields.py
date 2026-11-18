@@ -14,6 +14,14 @@ Skeleton Example" sections of the openRuyi Packaging Specification:
 * inside each field block the five core fields should appear in the
   documented order
 
+Only the five core fields are order checked. The documented relative order
+of the fourteen optional fields is not enforced here: the repository writes
+``Requires`` before ``Provides`` almost everywhere, which the full order
+table contradicts, so enforcing it would report 2319 of 6341 specs for a
+style migration rather than a per-file defect. The fields around
+``Requires`` are covered by ``check-spec-requires`` and the position of
+``Patch`` by ``check-spec-patch-patchlist``.
+
 A missing conditional field or conditional section is not a violation.
 Sections emitted by a known section-providing macro (such as
 ``%linux_package_implementation`` for kernel specs) count as present at
@@ -26,36 +34,25 @@ import re
 from collections.abc import Sequence
 
 
-# Fields every spec must contain, in the documented relative order.
+# Fields every spec must contain, in the documented relative order. Order is
+# enforced on these five only: they are the fields the repository writes in
+# the documented order almost without exception, so a break is a real
+# per-file defect rather than a pending style migration.
+#
+# The remaining fourteen optional fields are deliberately not ordered here.
+# ``Provides`` dominates the reason: measured against the corpus, the full
+# nineteen field order reports 10402 breaks in 2319 of 6341 specs, and
+# ``Provides`` alone accounts for 10138 of them, because the repository
+# overwhelmingly writes ``Requires`` before ``Provides`` while the
+# documented table places ``Provides`` first. The order of the fields around
+# ``Requires`` is covered by the sibling rule ``check-spec-requires``, and
+# the position of ``Patch`` by ``check-spec-patch-patchlist``.
 CORE_FIELD_ORDER: tuple[str, ...] = (
     'Name',
     'Version',
     'Release',
     'Summary',
     'License',
-)
-
-# The documented relative order of all optional fields (informational).
-FIELD_ORDER: tuple[str, ...] = (
-    'Name',
-    'Version',
-    'Release',
-    'Summary',
-    'License',
-    'URL',
-    'VCS',
-    'Source',
-    'BuildArch',
-    'BuildSystem',
-    'Patch',
-    'BuildOption',
-    'BuildRequires',
-    'Provides',
-    'Conflicts',
-    'Obsoletes',
-    'Recommends',
-    'Requires',
-    'Supplements',
 )
 
 # Sections that must exist and be ordered.

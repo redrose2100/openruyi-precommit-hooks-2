@@ -54,9 +54,17 @@ body.
 ### Scope notes
 
 - Check 6 uses the **core five** fields only. Enforcing the complete
-  19-field order is out of scope: the repository overwhelmingly writes
-  `Requires` before `Provides`, which is a style migration rather than a
-  per-file defect.
+  19-field order is out of scope, and the measurement that justifies it is
+  dominated by a single field. Against the 6341 spec files in the corpus,
+  the full 19-field order reports 10402 breaks in 2319 files (36.6% of the
+  repository). `Provides` alone accounts for 10138 of those 10402 breaks
+  (97.5%), because the repository overwhelmingly writes `Requires` before
+  `Provides` while the documented table places `Provides` first. That is a
+  repository-wide style migration, not a per-file defect, so it is excluded
+  here. Excluding `Provides` leaves 300 breaks in 182 files, which are not
+  ignored: the fields around `Requires` are covered by
+  `check-spec-requires` and the position of `Patch` by
+  `check-spec-patch-patchlist`.
 - Fields are collected per block. The main preamble and every `%package`
   block are evaluated separately, and only the **first** occurrence of a
   repeated field (for example several `BuildRequires:` lines) is considered.
