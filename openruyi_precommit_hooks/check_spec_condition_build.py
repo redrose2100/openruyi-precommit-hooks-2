@@ -12,21 +12,21 @@ and then tests the switch with ``%if %{with bootstrap}`` and
 ``%if %{without bootstrap}``, so the documented form always carries an
 explicit default value.
 
-That yields three checkpoints, all SHOULD level, because both clauses use
-the "should" wording and the example only shows the documented shape:
+That yields two checkpoints, both SHOULD level, because the clause uses the
+"should" wording and the example only shows the documented shape:
 
 * C1 - ``%bcond_with`` and ``%bcond_without`` are replaced by ``%bcond``.
-* C2 - a hand rolled ``%define with_<name> 0|1`` switch is replaced by
-  ``%bcond``.
-* C3 - a ``%bcond`` declaration carries an explicit default value.
+* C2 - a ``%bcond`` declaration carries an explicit default value.
 
-C1 follows clause 2 directly. C2 follows clause 1: an optional build switch
-written as ``%define with_foo 1`` plus ``%{?with_foo:...}`` is exactly the
-pre-``%bcond`` idiom the clause asks to replace, and the switch name prefix
-plus a boolean value is what makes it recognisable as a switch rather than
-as an ordinary macro. C3 follows the shape of the example: ``%bcond`` is a
-declaration form, so a bare name leaves the switch without the default the
-clause shows, and a later ``%if %{with <name>}`` then has nothing to test.
+C1 follows the clause directly. C2 follows the shape of the example:
+``%bcond`` is a declaration form, so a bare name leaves the switch without
+the default the clause shows, and a later ``%if %{with <name>}`` then has
+nothing to test.
+
+A hand rolled ``%define with_<name> 0|1`` switch is not reported: the clause
+names ``%bcond`` and the two legacy macros, and it does not describe the
+general purpose ``%define`` family, so reading it as a switch requirement
+would be an inference the spec text does not support.
 
 Deliberately out of scope, each because the clause does not reach it or
 because the spec text alone cannot decide it:
@@ -70,15 +70,6 @@ RE_BCOND = re.compile(r'^%bcond\s+(?P<name>\S+)(?P<rest>.*)$')
 # suggest the matching "%bcond" default: "%bcond_with" defaults to off and
 # "%bcond_without" defaults to on.
 RE_LEGACY = re.compile(r'^%bcond_with(?P<out>out)?\s+(?P<name>\S+)')
-
-# A hand rolled switch: "%define with_foo 1", "%global without_docs 0", or
-# the older "%define _with_foo 1" spelling. The value must be a boolean
-# literal, because that is what separates a switch from an ordinary macro
-# such as "%define with_docdir /usr/share/doc".
-RE_MANUAL = re.compile(
-    r'^%(?:define|global)\s+(?P<name>_?with(?:out)?_\w+)\s'
-    r'+(?P<value>[01])\s*$',
-)
 
 
 def _dedup(errors: list[str]) -> list[str]:
@@ -127,36 +118,8 @@ def _check_legacy_form(lines: list[str]) -> list[str]:
     return errors
 
 
-def _check_manual_switch(lines: list[str]) -> list[str]:
-    """C2: an optional build switch is defined with ``%bcond``.
-
-    Only a name that carries the ``with_`` / ``without_`` / ``_with_``
-    prefix and a boolean value is reported. A same shaped macro that holds
-    a path or a version is an ordinary macro, not a switch.
-    """
-    errors: list[str] = []
-    for index, line in enumerate(lines):
-        text = _directive(line)
-        match = RE_MANUAL.match(text)
-        if match is None:
-            continue
-        name = match.group('name')
-        value = match.group('value')
-        # The switch name after "%bcond" drops the boolean prefix, so a
-        # "with_foo" macro maps to the switch "foo".
-        switch = re.sub(r'^_?with(?:out)?_', '', name)
-        if not switch:
-            continue
-        verb = '%define' if text.startswith('%define') else '%global'
-        errors.append(
-            f'manual build switch "{name}" (line {index + 1}) is defined '
-            f'with {verb}; write "%bcond {switch} {value}" instead',
-        )
-    return errors
-
-
 def _check_default_value(lines: list[str]) -> list[str]:
-    """C3: a ``%bcond`` declaration carries an explicit default value."""
+    """C2: a ``%bcond`` declaration carries an explicit default value."""
     errors: list[str] = []
     for index, line in enumerate(lines):
         text = _directive(line)
@@ -177,7 +140,6 @@ def _check_spec_condition_build_ext(
     filename: str,
     *,
     check_legacy_form: bool = True,
-    check_manual_switch: bool = True,
     check_default_value: bool = True,
 ) -> list[str]:
     lines, error = _read_lines(filename)
@@ -188,8 +150,6 @@ def _check_spec_condition_build_ext(
     errors: list[str] = []
     if check_legacy_form:
         errors.extend(_check_legacy_form(lines))
-    if check_manual_switch:
-        errors.extend(_check_manual_switch(lines))
     if check_default_value:
         errors.extend(_check_default_value(lines))
 
@@ -215,11 +175,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         help='do not report the %bcond_with and %bcond_without forms',
     )
     parser.add_argument(
-        '--no-check-manual-switch',
-        action='store_true',
-        help='do not report a %define style manual build switch',
-    )
-    parser.add_argument(
         '--no-check-default-value',
         action='store_true',
         help='do not report a %bcond declaration without a default value',
@@ -231,7 +186,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         errors = _check_spec_condition_build_ext(
             filename,
             check_legacy_form=not args.no_check_legacy_form,
-            check_manual_switch=not args.no_check_manual_switch,
             check_default_value=not args.no_check_default_value,
         )
         if errors:

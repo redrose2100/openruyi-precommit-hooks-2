@@ -115,46 +115,7 @@ An example package.
 %autochangelog
 """
 
-MANUAL_GLOBAL_SWITCH_SPEC = """\
-Name:           foo
-Version:        1.0
-Release:        %autorelease
-Summary:        Example package
-License:        MulanPSL-2.0
-
-%global with_tests 1
-
-%description
-An example package.
-
-%files
-
-%changelog
-%autochangelog
-"""
-
-# An ordinary macro that happens to start with "with" is not a switch: the
-# value is not a boolean literal.
-ORDINARY_MACRO_SPEC = """\
-Name:           foo
-Version:        1.0
-Release:        %autorelease
-Summary:        Example package
-License:        MulanPSL-2.0
-
-%define with_docdir /usr/share/doc/foo
-%global without_manpages %{_mandir}
-
-%description
-An example package.
-
-%files
-
-%changelog
-%autochangelog
-"""
-
-NO_DEFAULT_SPEC = """\
+NO_DEFAULT_SPEC = """\\
 Name:           foo
 Version:        1.0
 Release:        %autorelease
@@ -318,25 +279,10 @@ def test_legacy_without_suggests_default_one(tmp_path: Path) -> None:
     assert '%bcond pkgconfig_compat 1' in errors[0]
 
 
-def test_manual_define_switch_is_reported(tmp_path: Path) -> None:
+def test_manual_switch_is_not_reported(tmp_path: Path) -> None:
+    # The clause names %bcond and the two legacy macros, not the general
+    # purpose %define family.
     path = _write(tmp_path, 'foo.spec', MANUAL_SWITCH_SPEC)
-    errors = _check_spec_condition_build(path)
-    assert len(errors) == 2
-    assert '%bcond mroonga 1' in errors[0]
-    assert '%bcond rocksdb 0' in errors[1]
-
-
-def test_manual_global_switch_is_reported(tmp_path: Path) -> None:
-    path = _write(tmp_path, 'foo.spec', MANUAL_GLOBAL_SWITCH_SPEC)
-    errors = _check_spec_condition_build(path)
-    assert len(errors) == 1
-    assert 'manual build switch "with_tests"' in errors[0]
-    assert 'defined with %global' in errors[0]
-    assert '%bcond tests 1' in errors[0]
-
-
-def test_ordinary_macro_is_not_a_switch(tmp_path: Path) -> None:
-    path = _write(tmp_path, 'foo.spec', ORDINARY_MACRO_SPEC)
     assert _check_spec_condition_build(path) == []
 
 
@@ -382,7 +328,7 @@ def test_multiple_findings_in_one_spec(tmp_path: Path) -> None:
         ),
     )
     errors = _check_spec_condition_build(path)
-    assert len(errors) == 3
+    assert len(errors) == 2
 
 
 def test_all_flags_disabled_keeps_findings_silent(tmp_path: Path) -> None:
@@ -390,7 +336,6 @@ def test_all_flags_disabled_keeps_findings_silent(tmp_path: Path) -> None:
     errors = _check_spec_condition_build_ext(
         path,
         check_legacy_form=False,
-        check_manual_switch=False,
         check_default_value=False,
     )
     assert errors == []
@@ -403,17 +348,6 @@ def test_disable_only_legacy_form(tmp_path: Path) -> None:
         _spec_with_body('x', '%bcond_with openssl\n%bcond bootstrap\n'),
     )
     errors = _check_spec_condition_build_ext(path, check_legacy_form=False)
-    assert len(errors) == 1
-    assert 'no default value' in errors[0]
-
-
-def test_disable_only_manual_switch(tmp_path: Path) -> None:
-    path = _write(
-        tmp_path,
-        'foo.spec',
-        _spec_with_body('x', '%define with_mroonga 1\n%bcond bootstrap\n'),
-    )
-    errors = _check_spec_condition_build_ext(path, check_manual_switch=False)
     assert len(errors) == 1
     assert 'no default value' in errors[0]
 
@@ -487,12 +421,3 @@ def test_bcond_name_case_is_kept_verbatim(tmp_path: Path) -> None:
     errors = _check_spec_condition_build(path)
     assert len(errors) == 1
     assert '%bcond OpenSSL 0' in errors[0]
-
-
-def test_define_without_underscore_is_not_a_switch(tmp_path: Path) -> None:
-    path = _write(
-        tmp_path,
-        'foo.spec',
-        _spec_with_body('x', '%define without_docs yes'),
-    )
-    assert _check_spec_condition_build(path) == []
