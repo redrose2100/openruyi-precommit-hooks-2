@@ -231,3 +231,23 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-subpackaging
+  name: check-spec-subpackaging
+  description: >-
+    Ensure spec subpackaging follows the openRuyi Subpackaging and Splitting
+    rules and the SplitPackage supplement: a subpackage name separates its
+    parts with "-" rather than "_" or ".", headers, pkgconfig files and
+    CMake package files live in the -devel subpackage, a -devel subpackage
+    holds no versioned shared library, the unversioned lib*.so link lives in
+    the -devel subpackage, and a subpackage that requires its base package
+    pins it as = %{version}-%{release}. Use --no-check-name to skip the name
+    separator, --no-check-dev-files to skip the development file placement,
+    --no-check-versioned-library to skip the versioned library rule,
+    --no-check-unversioned-link to skip the linker link rule and
+    --no-check-dependency to skip the version pin rule.
+  entry: check-spec-subpackaging
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
