@@ -251,3 +251,22 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-script
+  name: check-spec-script
+  description: >-
+    Ensure spec scriptlets follow the openRuyi Scriptlet rules and the
+    Scriptlets supplement: a scriptlet that runs a single argument free
+    program uses the "-p" header form, a scriptlet does not leave the
+    transaction status to a bare command, %pretrans is not used, each
+    transaction argument test is a range test rather than one exact count,
+    and an install side scriptlet does not carry the erase branch. Use
+    --no-check-single-program to skip the "-p" rule, --no-check-exit-status
+    to skip the success status rule, --no-check-pretrans to skip the
+    %pretrans rule, --no-check-transaction-range to skip the range rule and
+    --no-check-transaction-side to skip the transaction side rule.
+  entry: check-spec-script
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
