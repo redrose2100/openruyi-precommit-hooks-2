@@ -270,3 +270,18 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+- id: check-spec-condition-build
+  name: check-spec-condition-build
+  description: >-
+    Ensure spec conditional build switches follow the openRuyi conditional
+    build rules: an optional build switch is declared with %bcond rather
+    than %bcond_with or %bcond_without, a hand rolled %define with_<name>
+    switch is replaced by %bcond, and every %bcond declaration carries an
+    explicit default value. Use --no-check-legacy-form to skip the
+    %bcond_with rule, --no-check-manual-switch to skip the %define switch
+    rule and --no-check-default-value to skip the default value rule.
+  entry: check-spec-condition-build
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
