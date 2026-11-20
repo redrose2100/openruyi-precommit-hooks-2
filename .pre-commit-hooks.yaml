@@ -284,3 +284,17 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-build-autotools
+  name: check-spec-build-autotools
+  description: >-
+    Ensure a spec that declares the autotools build system also declares its
+    required BuildRequires: autoconf, automake, libtool and make. gcc is
+    exempt because the build environment preinstalls it. Use
+    --no-check-buildrequires to skip the rule and --check-dynamic to also
+    report a spec that uses %generate_buildrequires.
+  entry: check-spec-build-autotools
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
