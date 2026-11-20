@@ -10,24 +10,28 @@ Source: <https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines/BuildSy
 The page states that a CMake package must declare the build-system field and
 must depend on `cmake`:
 
-> 在 `BuildSystem` 字段中指定 `cmake`，并在 `BuildRequires` 中声明 `cmake`。
+> Specify `cmake` in the `BuildSystem` field, and declare `cmake` in
+> `BuildRequires`.
 
 The same dependency clause is repeated for the `%build` step, where the macros
 are described as already handling the configure, build and install phases:
 
-> 构建系统说明：
-> - 使用 `%cmake` 宏自动处理配置阶段，所有 `-D` 选项应通过 `BuildOption(conf)` 传递。
-> - 使用 `%cmake_build` 宏自动处理构建阶段。
-> - 使用 `%cmake_install` 宏自动处理安装阶段。
-> - `%ctest` 宏自动运行测试，额外的测试参数应通过 `BuildOption(check)` 传递。
+> Build system notes:
+> - The `%cmake` macro handles the configure phase automatically; every `-D`
+>   option belongs in `BuildOption(conf)`.
+> - The `%cmake_build` macro handles the build phase automatically.
+> - The `%cmake_install` macro handles the install phase automatically.
+> - The `%ctest` macro runs the tests automatically; extra test arguments
+>   belong in `BuildOption(check)`.
 
 Two consequences of that wording are machine-checkable and are reported here:
 
-1. Because `%ctest` "自动运行测试", an explicit `%check` section whose whole
-   body is an argument-free `ctest` cannot add anything to the build.
-2. Because the `-D` options "应通过 `BuildOption(conf)` 传递" and the macros
-   "自动处理" each phase, a `BuildOption(conf)` flag that repeats a value the
-   shipped macros already define is dead weight.
+1. Because `%ctest` "runs the tests automatically", an explicit `%check`
+   section whose whole body is an argument-free `ctest` cannot add anything
+   to the build.
+2. Because the `-D` options "belong in `BuildOption(conf)`" and the macros
+   "handle" each phase "automatically", a `BuildOption(conf)` flag that
+   repeats a value the shipped macros already define is dead weight.
 
 ## Flags
 

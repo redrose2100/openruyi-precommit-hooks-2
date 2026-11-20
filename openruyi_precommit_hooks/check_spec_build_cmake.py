@@ -5,7 +5,7 @@ opts into the declarative cmake build system, and it states both the
 dependency that the choice implies and the options the shipped macros
 already supply.
 
-Section "依赖" (Dependencies):
+Section "Dependencies":
 
 > If you want to use the cmake build system, you need to add these
 > BuildRequires, because gcc is preinstalled in the build environment and
@@ -13,7 +13,7 @@ Section "依赖" (Dependencies):
 >
 >     BuildRequires:  cmake
 
-Section "构建系统说明" (Build system notes) lists the values that the
+Section "Build system notes" lists the values that the
 macros in ``/usr/lib/rpm/macros.d/macros.cmake`` already define, and the
 worked example of the page removes the redundant settings from the spec:
 
@@ -140,9 +140,9 @@ RE_DEFINE = re.compile(
 )
 
 # The exact defaults the shipped macros already define, transcribed from the
-# "构建系统说明" bullet list and from the flags the worked example deletes.
-# A flag is redundant only when both the name and the value match one of
-# these pairs.
+# "Build system notes" bullet list and from the flags the worked example
+# deletes. A flag is redundant only when both the name and the value match
+# one of these pairs.
 PRESET_VALUES: dict[str, tuple[str, ...]] = {
     'CMAKE_BUILD_TYPE': ('RelWithDebInfo',),
     'CMAKE_VERBOSE_MAKEFILE': ('ON',),
@@ -241,7 +241,7 @@ def _blocks_of(lines: list[str]) -> list[_Block]:
         if match is None:
             continue
         name, stage, value = (
-            match.group(1), match.group(2) or '', match.group(3)
+            match.group(1), match.group(2) or '', match.group(3),
         )
         fields.append((name, stage.strip(), value, index))
         macro_depth = _macro_depth_after(line, 0)
@@ -290,8 +290,8 @@ def _system_lines(blocks: Sequence[_Block]) -> list[int]:
         line
         for block in blocks
         for name, _stage, value, line in block.fields
-        if RE_BUILD_SYSTEM.match(name) is not None
-        and value.strip().lower() == CMAKE
+        if RE_BUILD_SYSTEM.match(name) is not None and
+        value.strip().lower() == CMAKE
     ]
 
 

@@ -313,3 +313,17 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-build-go
+  name: check-spec-build-go
+  description: >-
+    Ensure a spec that declares BuildSystem: golang or golangmodules declares
+    both go and go-rpm-macros in BuildRequires, and defines the _name and
+    go_import_path macros in the header. Use --no-check-buildrequires,
+    --no-check-name-macro and --no-check-import-path-macro to skip the
+    individual checks.
+  entry: check-spec-build-go
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
