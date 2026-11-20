@@ -7,7 +7,7 @@ Source: <https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines/BuildSy
 The `autotools` supplement of the packaging guidelines states the build
 dependency that a spec takes on when it selects this build system.
 
-Section "依赖" (Dependencies):
+Section "Dependencies":
 
 > If you want to use the autotools build system, you need to add these
 > BuildRequires, because gcc is preinstalled in the build environment and

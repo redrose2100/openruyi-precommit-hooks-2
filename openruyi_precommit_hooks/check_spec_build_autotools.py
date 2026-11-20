@@ -291,8 +291,8 @@ def _system_lines(
         line
         for block in blocks
         for name, value, line in block.fields
-        if RE_BUILD_SYSTEM.match(name) is not None
-        and value.lower() == AUTOTOOLS
+        if RE_BUILD_SYSTEM.match(name) is not None and
+        value.lower() == AUTOTOOLS
     ]
 
 

@@ -298,3 +298,18 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-build-cmake
+  name: check-spec-build-cmake
+  description: >-
+    Ensure a spec that declares BuildSystem: cmake declares cmake in
+    BuildRequires, does not keep a %check section whose only statement is a
+    bare ctest, and does not repeat a value the cmake macros already define
+    in BuildOption(conf). Use --no-check-buildrequires,
+    --no-check-check-section and --no-check-build-option to skip the
+    individual checks.
+  entry: check-spec-build-cmake
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
