@@ -327,3 +327,18 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-build-meson
+  name: check-spec-build-meson
+  description: >-
+    Ensure a spec that declares BuildSystem: meson declares meson in
+    BuildRequires, writes every meson -D option in BuildOption(conf)
+    instead of another stage or an inline section statement, and does not
+    keep a plain %build or %install section with a body of its own. Use
+    --no-check-buildrequires, --no-check-option-position and
+    --no-check-plain-sections to skip the individual checks.
+  entry: check-spec-build-meson
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true

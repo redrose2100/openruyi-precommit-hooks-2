@@ -194,7 +194,7 @@ def _blocks_of(lines: list[str]) -> list[_Block]:
         if match is None:
             continue
         name, stage, value = (
-            match.group(1), match.group(2) or '', match.group(3)
+            match.group(1), match.group(2) or '', match.group(3),
         )
         fields.append((name, stage.strip(), value, index))
         macro_depth = _macro_depth_after(line, 0)
@@ -333,9 +333,9 @@ def _check_spec_build_go_ext(
         return [error]
     assert lines is not None
     if not (
-        check_buildrequires
-        or check_name_macro
-        or check_import_path_macro
+        check_buildrequires or
+        check_name_macro or
+        check_import_path_macro
     ):
         return []
 
