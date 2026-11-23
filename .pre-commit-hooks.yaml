@@ -342,3 +342,17 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-build-perl
+  name: check-spec-build-perl
+  description: >-
+    Ensure a spec that declares BuildSystem: perlbuild or perlmaker
+    declares the shared Perl build dependencies, declares the module its
+    build system implies, and reads the generated file list with
+    %files -f. Use --no-check-shared-packages, --no-check-module and
+    --no-check-files-list to skip the individual checks.
+  entry: check-spec-build-perl
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
