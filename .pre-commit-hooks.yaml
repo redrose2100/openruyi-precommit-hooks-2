@@ -356,3 +356,20 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-build-pyproject
+  name: check-spec-build-pyproject
+  description: >-
+    Ensure a spec that declares BuildSystem: pyproject declares the
+    pyproject macro package and a Python development dependency, passes
+    the module name to the install stage, keeps %check non-empty, and
+    states the reason for every BuildOption(check) group. Use
+    --no-check-macros-package, --no-check-python-devel,
+    --no-check-install-option, --no-check-install-option-module,
+    --no-check-check-section and --no-check-check-reason to skip the
+    individual checks.
+  entry: check-spec-build-pyproject
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true

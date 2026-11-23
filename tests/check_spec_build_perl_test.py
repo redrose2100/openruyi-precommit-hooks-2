@@ -490,9 +490,11 @@ def test_main_returns_one_and_prints_findings(
 def test_main_flag_disables_a_check(
     tmp_path: Path, capsys: pytest.CaptureFixture[str],
 ) -> None:
-    path = _write(tmp_path, CLEAN_PERLMAKER_SPEC.replace(
-        'BuildRequires:  perl(ExtUtils::MakeMaker)\n', '',
-    ))
+    path = _write(
+        tmp_path, CLEAN_PERLMAKER_SPEC.replace(
+            'BuildRequires:  perl(ExtUtils::MakeMaker)\n', '',
+        ),
+    )
     assert main(['--no-check-module', path]) == 0
     assert capsys.readouterr().out == ''
 

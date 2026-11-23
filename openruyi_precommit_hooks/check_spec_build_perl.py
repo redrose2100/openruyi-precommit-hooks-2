@@ -87,7 +87,9 @@ RE_BUILD_REQUIRES = re.compile(r'^build-?requires?$', re.IGNORECASE)
 # A Perl module capability such as "perl(Module::Build)". The capability is
 # a rich dependency, so the generic dependency splitter drops it; matching it
 # separately keeps the colon-separated module name intact.
-RE_PERL_CAPABILITY = re.compile(r'\bperl\(\s*([A-Za-z_][\w:]*)\s*\)', re.IGNORECASE)
+RE_PERL_CAPABILITY = re.compile(
+    r'\bperl\(\s*([A-Za-z_][\w:]*)\s*\)', re.IGNORECASE,
+)
 
 # The "-f" argument of a %files section, which makes RPM read the file list
 # from a separate file instead of the section body.
@@ -338,7 +340,7 @@ def _declared_everywhere(blocks: Sequence[_Block]) -> set[str]:
 
 
 def _capabilities_everywhere(blocks: Sequence[_Block]) -> set[str]:
-    """Return every ``perl(...)`` capability declared in a build-requires field."""
+    """Return every ``perl(...)`` capability in a build-requires field."""
     declared: set[str] = set()
     for block in blocks:
         for name, _stage, value, _line in block.fields:
