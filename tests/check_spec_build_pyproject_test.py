@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from openruyi_precommit_hooks.check_spec_build_pyproject import (
     _check_spec_build_pyproject,
 )

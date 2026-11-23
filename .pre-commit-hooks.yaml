@@ -373,3 +373,19 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-build-rust
+  name: check-spec-build-rust
+  description: >-
+    Ensure a spec that declares BuildSystem: rust or BuildSystem:
+    rustcrates declares the rust macro package, and that a rust spec also
+    declares the rust toolchain and keeps the system registry configuration
+    when it overrides %prep, while a rustcrates spec does not write %install
+    by hand. Use --no-check-crates-install, --no-check-rust-prep,
+    --no-check-macros-package and --no-check-toolchain to skip the
+    individual checks.
+  entry: check-spec-build-rust
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
