@@ -450,8 +450,10 @@ def test_ext_flag_keeps_the_others(tmp_path: Path) -> None:
     path = _write(tmp_path, BROKEN_SPEC)
     errors = _check_spec_build_rust_ext(path, check_toolchain=False)
     assert len(errors) == 2
-    assert all('rust-rpm-macros' in err or '%rust_setup_registry' in err
-               for err in errors)
+    assert all(
+        'rust-rpm-macros' in err or '%rust_setup_registry' in err
+        for err in errors
+    )
 
 
 def test_main_reports_and_sets_exit_code(

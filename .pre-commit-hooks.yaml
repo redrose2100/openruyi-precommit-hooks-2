@@ -389,3 +389,25 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-programming-golang
+  name: check-spec-programming-golang
+  description: >-
+    Ensure a spec that declares a Go build system follows the Go language
+    packaging guideline: it declares the go toolchain and the go-rpm-macros
+    package, writes a Go library dependency as go(<import path>), states the
+    version of the go() capability it provides, installs every library file
+    under the Go source tree, derives the library package name from the
+    import path, keeps the go- prefix off the binary package name, keeps one
+    library per test include macro, and declares the packages that share an
+    import path mutually exclusive. Use --no-check-toolchain,
+    --no-check-macros-package, --no-check-virtual-dependency,
+    --no-check-capability-version, --no-check-files-location,
+    --no-check-package-name, --no-check-binary-name,
+    --no-check-test-include and --no-check-shared-import-path to skip the
+    individual checks.
+  entry: check-spec-programming-golang
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
