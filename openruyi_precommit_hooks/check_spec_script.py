@@ -538,7 +538,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         '--no-check-pretrans',
         action='store_true',
-        help='do not report the use of %pretrans',
+        help='do not report the use of %%pretrans',
     )
     parser.add_argument(
         '--no-check-transaction-range',

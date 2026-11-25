@@ -586,7 +586,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         '--no-check-check-section',
         action='store_true',
-        help='do not report an empty %check section',
+        help='do not report an empty %%check section',
     )
     parser.add_argument(
         '--no-check-check-reason',

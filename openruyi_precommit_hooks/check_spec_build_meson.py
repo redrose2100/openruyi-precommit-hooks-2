@@ -475,7 +475,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         '--no-check-plain-sections',
         action='store_true',
-        help='do not report a %build or %install section with a body',
+        help='do not report a %%build or %%install section with a body',
     )
     args = parser.parse_args(argv)
 

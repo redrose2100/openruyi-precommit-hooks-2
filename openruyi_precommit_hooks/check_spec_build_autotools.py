@@ -379,7 +379,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         action='store_true',
         help=(
             'report a missing autotools build dependency even when the '
-            'spec uses %generate_buildrequires'
+            'spec uses %%generate_buildrequires'
         ),
     )
     args = parser.parse_args(argv)

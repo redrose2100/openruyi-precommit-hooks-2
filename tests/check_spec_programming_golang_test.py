@@ -166,20 +166,23 @@ def test_other_build_system_is_ignored(tmp_path: Path) -> None:
 
 def test_missing_toolchain_is_reported(tmp_path: Path) -> None:
     content = CLEAN_LIBRARY_SPEC.replace(
-        'BuildRequires:  go\n', '')
+        'BuildRequires:  go\n', '',
+    )
     message = _single_error(tmp_path, content)
     assert 'missing "go"' in message
 
 
 def test_versioned_toolchain_is_accepted(tmp_path: Path) -> None:
     content = CLEAN_LIBRARY_SPEC.replace(
-        'BuildRequires:  go\n', 'BuildRequires:  go >= 1.20\n')
+        'BuildRequires:  go\n', 'BuildRequires:  go >= 1.20\n',
+    )
     assert CHECK(_write(tmp_path, content)) == []
 
 
 def test_toolchain_checker_can_be_disabled(tmp_path: Path) -> None:
     content = CLEAN_LIBRARY_SPEC.replace(
-        'BuildRequires:  go\n', '')
+        'BuildRequires:  go\n', '',
+    )
     assert CHECK_EXT(
         _write(tmp_path, content), check_toolchain=False,
     ) == []
@@ -192,7 +195,8 @@ def test_toolchain_checker_can_be_disabled(tmp_path: Path) -> None:
 
 def test_missing_macros_package_is_reported(tmp_path: Path) -> None:
     content = CLEAN_LIBRARY_SPEC.replace(
-        'BuildRequires:  go-rpm-macros\n', '')
+        'BuildRequires:  go-rpm-macros\n', '',
+    )
     message = _single_error(tmp_path, content)
     assert 'missing "go-rpm-macros"' in message
 
@@ -208,7 +212,8 @@ def test_macros_package_extra_does_not_satisfy(tmp_path: Path) -> None:
 
 def test_macros_package_checker_can_be_disabled(tmp_path: Path) -> None:
     content = CLEAN_LIBRARY_SPEC.replace(
-        'BuildRequires:  go-rpm-macros\n', '')
+        'BuildRequires:  go-rpm-macros\n', '',
+    )
     assert CHECK_EXT(
         _write(tmp_path, content), check_macros_package=False,
     ) == []

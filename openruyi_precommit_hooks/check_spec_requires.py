@@ -766,7 +766,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         '--no-check-main-isa',
         action='store_true',
-        help='do not report a pin that omits the %{?_isa} suffix',
+        help='do not report a pin that omits the %%{?_isa} suffix',
     )
     args = parser.parse_args(argv)
 

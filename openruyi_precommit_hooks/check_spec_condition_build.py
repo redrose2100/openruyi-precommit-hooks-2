@@ -172,12 +172,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         '--no-check-legacy-form',
         action='store_true',
-        help='do not report the %bcond_with and %bcond_without forms',
+        help='do not report the %%bcond_with and %%bcond_without forms',
     )
     parser.add_argument(
         '--no-check-default-value',
         action='store_true',
-        help='do not report a %bcond declaration without a default value',
+        help='do not report a %%bcond declaration without a default value',
     )
     args = parser.parse_args(argv)
 

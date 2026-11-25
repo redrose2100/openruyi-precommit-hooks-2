@@ -57,7 +57,8 @@ from __future__ import annotations
 import argparse
 import os
 import re
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
+from collections.abc import Sequence
 from typing import NamedTuple
 
 
@@ -327,7 +328,7 @@ def _expand_text(
     if depth >= _EXPANSIONS:
         return text
 
-    def replace(match: 're.Match[str]') -> str:
+    def replace(match: re.Match[str]) -> str:
         name = match.group(1)
         if name not in macros or name in pending:
             return match.group(0)
@@ -781,8 +782,10 @@ def _check_binary_name(
                 name_line = line
                 break
         if not name:
-            match = re.match(r'^%package\s+(?:-n\s+)?(\S+)$', package.header,
-                             re.IGNORECASE)
+            match = re.match(
+                r'^%package\s+(?:-n\s+)?(\S+)$', package.header,
+                re.IGNORECASE,
+            )
             if match is None:
                 continue
             name = _expand(match.group(1), macros)
@@ -860,8 +863,12 @@ def _check_shared_import_path(
                 continue
             if path in capabilities.conflicted.get(filename, set()):
                 continue
-            siblings = ', '.join(sorted(os.path.basename(other)
-                                        for other in others))
+            siblings = ', '.join(
+                sorted(
+                    os.path.basename(other)
+                    for other in others
+                ),
+            )
             found.append(
                 f'Provides: go({path}) (line {line}) shares its import path '
                 f'with {siblings}; the page requires the packages that '
@@ -940,20 +947,26 @@ def _check_spec_programming_golang_ext(
         errors.extend(_check_capability_version(analysis.packages))
     if check_files_location:
         errors.extend(
-            _check_files_location(analysis.packages, analysis.macros))
+            _check_files_location(analysis.packages, analysis.macros),
+        )
     if check_package_name:
         errors.extend(
             _check_package_name(
-                analysis.systems, analysis.packages, analysis.macros))
+                analysis.systems, analysis.packages, analysis.macros,
+            ),
+        )
     if check_binary_name:
         errors.extend(
             _check_binary_name(
-                analysis.systems, analysis.packages, analysis.macros))
+                analysis.systems, analysis.packages, analysis.macros,
+            ),
+        )
     if check_test_include:
         errors.extend(_check_test_include(analysis.macros))
     if check_shared_import_path and capabilities is not None:
         errors.extend(
-            _check_shared_import_path(filename, analysis, capabilities))
+            _check_shared_import_path(filename, analysis, capabilities),
+        )
 
     return _dedup([f'{filename}: {err}' for err in errors])
 

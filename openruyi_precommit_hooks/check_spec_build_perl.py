@@ -491,7 +491,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         '--no-check-files-list',
         action='store_true',
-        help='do not report a %files section without -f',
+        help='do not report a %%files section without -f',
     )
     args = parser.parse_args(argv)
 

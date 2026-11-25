@@ -511,12 +511,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         '--no-check-crates-install',
         action='store_true',
-        help='do not report a hand-written %install in a rustcrates spec',
+        help='do not report a hand-written %%install in a rustcrates spec',
     )
     parser.add_argument(
         '--no-check-rust-prep',
         action='store_true',
-        help='do not report a %prep override without the registry setup',
+        help='do not report a %%prep override without the registry setup',
     )
     parser.add_argument(
         '--no-check-macros-package',

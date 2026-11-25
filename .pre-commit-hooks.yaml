@@ -411,3 +411,23 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-programming-perl
+  name: Check the Perl language packaging guideline
+  description: >-
+    Enforce the requirements that the Perl language guideline states for a
+    CPAN style module package. The spec must be named after the CPAN
+    distribution, must use a non-versioned metacpan URL, must declare the
+    shared Perl macro packages, must write module dependencies in the
+    perl(MODULE) form, must not hand-write build stages in a declarative
+    build system, must read a generated file list, and must keep .h files
+    in the module package. Use --no-check-package-name, --no-check-url,
+    --no-check-shared-packages, --no-check-build-module-form,
+    --no-check-runtime-capability, --no-check-declarative-stages,
+    --no-check-generated-filelist and --no-check-devel-headers to skip the
+    individual checks.
+  entry: check-spec-programming-perl
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
