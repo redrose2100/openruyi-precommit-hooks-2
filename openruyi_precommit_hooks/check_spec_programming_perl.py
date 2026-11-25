@@ -55,7 +55,8 @@ from __future__ import annotations
 
 import argparse
 import re
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
+from collections.abc import Sequence
 from typing import NamedTuple
 from urllib.parse import unquote
 
@@ -161,8 +162,10 @@ RE_METACPAN_DIST = re.compile(
 
 # A source entry that fetches a tarball from CPAN. That is the only reliable
 # signal a spec-only linter has for "this package is based on CPAN".
-RE_CPAN_SOURCE = re.compile(r'(?:cpan\.metacpan\.org|www\.cpan\.org)'
-                            r'/authors/id/', re.IGNORECASE)
+RE_CPAN_SOURCE = re.compile(
+    r'(?:cpan\.metacpan\.org|www\.cpan\.org)'
+    r'/authors/id/', re.IGNORECASE,
+)
 
 # A version number inside a metacpan path. The page asks for a non-versioned
 # URL, so a distribution directory that carries one is a finding.
@@ -306,7 +309,7 @@ def _expand_text(
     if depth >= _EXPANSIONS:
         return text
 
-    def replace(match: 're.Match[str]') -> str:
+    def replace(match: re.Match[str]) -> str:
         name = match.group(1)
         if name not in macros or name in pending:
             return match.group(0)
@@ -318,8 +321,10 @@ def _expand_text(
     return re.sub(r'%(\w+)', replace, current)
 
 
-def _packages_of(lines: Sequence[str]) -> tuple[list[_Package],
-                                               list[tuple[str, str, int]]]:
+def _packages_of(lines: Sequence[str]) -> tuple[
+    list[_Package],
+    list[tuple[str, str, int]],
+]:
     """Split the file into packages, and record every section header.
 
     Every ``%package`` header opens a fresh package, so a subpackage is
@@ -424,7 +429,7 @@ def _analyse(lines: Sequence[str]) -> _Analysis:
 
 
 def _single_field(
-    package: _Package, pattern: 're.Pattern[str]',
+    package: _Package, pattern: re.Pattern[str],
 ) -> tuple[str, int] | None:
     """Return ``(value, line)`` of the first field the pattern selects."""
     for name, _stage, value, line in package.fields:
@@ -477,8 +482,10 @@ def _build_dependencies(packages: Sequence[_Package]) -> set[str]:
     for package in packages:
         for name, _stage, value, _line in package.fields:
             if RE_BUILD_REQUIRES.match(name) is not None:
-                declared |= {item.lower()
-                             for item in _dependency_names(value)}
+                declared |= {
+                    item.lower()
+                    for item in _dependency_names(value)
+                }
     return declared
 
 
@@ -486,8 +493,8 @@ def _bare_perl_dependencies(value: str) -> list[str]:
     """Return the plain ``perl-*`` package names on one dependency line."""
     items = [
         name for name in _dependency_names(value)
-        if name.lower().startswith(PERL_PREFIX)
-        and name.lower() not in TOOLCHAIN_PACKAGES
+        if name.lower().startswith(PERL_PREFIX) and
+        name.lower() not in TOOLCHAIN_PACKAGES
     ]
     return sorted(items, key=str.lower)
 
@@ -529,8 +536,10 @@ def _normalise_name(text: str) -> str:
     return re.sub(r'[+_]', '-', text).lower()
 
 
-def _is_cpan_source(packages: Sequence[_Package],
-                    macros: dict[str, _Macro]) -> bool:
+def _is_cpan_source(
+    packages: Sequence[_Package],
+    macros: dict[str, _Macro],
+) -> bool:
     """Return whether any source entry fetches a tarball from CPAN."""
     for package in packages:
         for name, _stage, value, _line in package.fields:
@@ -541,8 +550,10 @@ def _is_cpan_source(packages: Sequence[_Package],
     return False
 
 
-def _is_perl_package(packages: Sequence[_Package],
-                     macros: dict[str, _Macro]) -> bool:
+def _is_perl_package(
+    packages: Sequence[_Package],
+    macros: dict[str, _Macro],
+) -> bool:
     """Return whether this spec packages a Perl module.
 
     A spec qualifies when it declares a declarative Perl build system, or
@@ -554,8 +565,10 @@ def _is_perl_package(packages: Sequence[_Package],
     return name.startswith(PERL_PREFIX)
 
 
-def _primary_name(packages: Sequence[_Package],
-                  macros: dict[str, _Macro]) -> str:
+def _primary_name(
+    packages: Sequence[_Package],
+    macros: dict[str, _Macro],
+) -> str:
     """Return the macro-expanded name of the main package, or ''."""
     found = _single_field(packages[0], RE_NAME)
     if found is None:
@@ -697,8 +710,10 @@ def _check_runtime_capability(packages: Sequence[_Package]) -> list[str]:
     found: list[str] = []
     for package in packages:
         for name, _stage, value, line in package.fields:
-            if (RE_REQUIRES.match(name) is None and
-                    RE_PROVIDES.match(name) is None):
+            if (
+                RE_REQUIRES.match(name) is None and
+                RE_PROVIDES.match(name) is None
+            ):
                 continue
             for item in _bare_perl_dependencies(value):
                 found.append(
@@ -841,10 +856,12 @@ def _check_spec_programming_perl_ext(
             errors.extend(_check_shared_packages(declarative, declared))
         if check_declarative_stages:
             errors.extend(
-                _check_declarative_stages(declarative, analysis.sections))
+                _check_declarative_stages(declarative, analysis.sections),
+            )
         if check_generated_filelist:
             errors.extend(
-                _check_generated_filelist(declarative, analysis.sections))
+                _check_generated_filelist(declarative, analysis.sections),
+            )
     if check_devel_headers:
         errors.extend(_check_devel_headers(analysis))
     if check_build_module_form:

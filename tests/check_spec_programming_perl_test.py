@@ -660,7 +660,8 @@ def test_main_returns_one_and_prints_the_findings(
     tmp_path: Path, capsys: pytest.CaptureFixture[str],
 ) -> None:
     content = CLEAN_SPEC.replace(
-        'BuildRequires:  perl-macros\n', '')
+        'BuildRequires:  perl-macros\n', '',
+    )
     assert rule.main([_write(tmp_path, content)]) == 1
     assert 'missing perl-macros' in capsys.readouterr().out
 

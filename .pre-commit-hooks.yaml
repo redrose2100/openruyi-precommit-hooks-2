@@ -431,3 +431,21 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-programming-python
+  name: Check the Python language packaging guideline
+  description: >-
+    Enforce the requirements that the Python language guideline states for
+    a library package built with the declarative pyproject build system.
+    The package must carry the python- prefix, must define the srcname
+    macro, must spell that macro with a PEP 503 normalised name, must
+    provide a python3- capability, and must not declare an explicit
+    runtime dependency on python3. Use --no-check-package-name,
+    --no-check-srcname, --no-check-srcname-normalised,
+    --no-check-python3-provides and --no-check-python3-requires to skip
+    the individual checks.
+  entry: check-spec-programming-python
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true

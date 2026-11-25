@@ -8,21 +8,23 @@ for a package that ships a CPAN style Perl module.
 Source:
 <https://www.openruyi.cn/zh-Hans/docs/guide/packaging-guidelines/languages/Perl>
 
-Section "包命名" states, verbatim:
+Section "Package Naming" states, verbatim:
 
-> Perl 模块包的包名应命名为 `perl-CPANDIST`，其中 `CPANDIST` 是所打包的
-> CPAN 发行版名称。
+> Name Perl module packages in the form of `perl-CPANDIST`, where `CPANDIST`
+> is the name of the CPAN distribution being packaged.
 
-> 在极少数情况下，如果一个 CPAN 发行版因为依赖关系等原因需要被拆分成更小
-> 的子包，那么额外的子包应命名为 `perl-CPANDIST-Something`。
+> In rare cases, if a CPAN distribution must be split into smaller
+> subpackages because of dependency relationships or similar reasons, name
+> the additional subpackages `perl-CPANDIST-Something`.
 
-Section "URL 标签" states, verbatim:
+Section "URL Tag" states, verbatim:
 
-> 对于基于 CPAN 的包，`URL` 标签应使用非版本化的 `metacpan.org` URL。
+> For CPAN-based packages, the `URL` tag should use a non-versioned
+> `metacpan.org` URL.
 
 The section then gives the exact shape it asks for:
 
-> 例如，如果打包 `Net::XMPP` 模块，URL 应为:
+> For example, when packaging the `Net::XMPP` module:
 >
 > ```specfile
 > URL:            https://metacpan.org/release/Net-XMPP
@@ -33,9 +35,10 @@ URL is accepted as long as it carries no version. C2 therefore judges only
 the presence of a version in the path, not the choice between `/dist/` and
 `/release/`.
 
-Section "构建依赖" states, verbatim:
+Section "Build Dependencies" states, verbatim:
 
-> 使用声明式 Perl 构建系统的软件包通常应包含:
+> A typical Perl module package using the declarative build systems starts
+> with:
 >
 > ```specfile
 > BuildRequires:  perl-rpm-packaging
@@ -43,40 +46,45 @@ Section "构建依赖" states, verbatim:
 > BuildRequires:  perl-macros
 > ```
 
-> 如果在构建时需要特定的 Perl 模块，请使用 `perl(MODULE)` 格式。这也适用于
-> Perl 本身提供的核心模块，因为这些模块可能会随着时间推移在基础 Perl 包中
-> 移入或移出。
+> If your package requires specific Perl modules at build time, use the
+> `perl(MODULE)` form. This rule also applies to core modules that Perl
+> itself ships with, because upstream developers may move modules into or
+> out of the base Perl package over time.
 
-Section "Requires 和 Provides 标签" states, verbatim:
+Section "Requires and Provides Tags" states, verbatim:
 
-> 在编写 `Requires` 和 `Provides` 时，应使用 `perl(MODULE)` 格式，而不是直接
-> 依赖包名。
+> When writing `Requires` and `Provides`, use the `perl(MODULE)` form rather
+> than depending directly on package names.
 
-> 例如，一个需要 Perl 模块 `Archive::Zip` 的包不应显式依赖包名
-> `perl-Archive-Zip`，而应写成:
+> For example, a package requiring the Perl module `Archive::Zip` should not
+> explicitly require the package name `perl-Archive-Zip`. Instead, it should
+> require:
 >
 > ```specfile
 > Requires:       perl(Archive::Zip)
 > ```
 
-Section "选择构建系统" and "最小 spec 结构" state, verbatim:
+Section "Choosing a Build System" and "Minimal Spec Structure" state,
+verbatim:
 
-> 手写 spec 文件时，应先检查上游源码树使用哪一种构建脚本，然后选择对应的
-> 构建系统，而不是从头手写 `%build`、`%install` 和 `%check` 逻辑。
+> When writing a spec file manually, first check which upstream build script
+> is used, then choose the corresponding build system instead of writing
+> `%build`, `%install`, and `%check` logic from scratch.
 
-> 在大多数软件包中，不需要自定义 `%build`、`%install` 或 `%check` 段。只有当
-> 上游构建脚本需要额外参数时，才需要使用 `BuildOption(...)`。
+> In most packages, you do not need to define custom `%build`, `%install`, or
+> `%check` sections. Use `BuildOption(...)` entries only when the upstream
+> build script needs extra arguments.
 
-Section "文件列表" states, verbatim:
+Section "File Listings" states, verbatim:
 
-> 使用声明式 Perl 构建系统时，优先使用 `%files -f %{name}.files`。只有在需要
-> 自定义安装逻辑时，才通常需要手动列出 `%{perl_vendorlib}` 或
-> `%{perl_vendorarch}` 下的文件。
+> Prefer the generated file list when using the declarative build systems.
+> Manual file entries are mainly useful when custom install logic is
+> required.
 
-Section "模块包中的 `.h` 文件" states, verbatim:
+Section "`.h` Files in Module Packages" states, verbatim:
 
-> 如果一个 Perl 模块包含 `.h` 文件，这些文件不应仅因为是头文件就被拆分到
-> `-devel` 子包中。
+> If a Perl module includes `.h` files, do not split them into a `-devel`
+> subpackage only because of those header files.
 
 ## Flags
 
@@ -107,10 +115,15 @@ deliberately deviates from one clause can keep the rest.
 | C7 | The main file list reads a generated file list. | SHOULD | Spec with `BuildSystem: perlbuild` or `perlmaker`. |
 | C8 | Header files stay in the module package. | MUST | Any spec in scope. |
 
-The strength column follows the wording of the page. A clause worded as
-"应" or "不应" is treated as MUST; a clause worded as "通常应", "应…而
-不是直接依赖包名", "优先" or "在大多数软件包中" is treated as SHOULD, which
-is why those four checkpoints are the ones a downstream repository is most
+The strength column follows the wording of the page. A clause that gives a
+direct naming rule ("Name Perl module packages in the form of ...", "use
+the `perl(MODULE)` form rather than depending directly on package names")
+or a direct prohibition ("do not split them into a `-devel` subpackage")
+is treated as MUST. A clause worded as an expectation ("A typical Perl
+module package using the declarative build systems starts with ...", "In
+most packages, you do not need to define custom `%build` ... sections",
+"Prefer the generated file list") or as "should use" is treated as SHOULD,
+which is why C3, C5, C6 and C7 are the ones a downstream repository is most
 likely to switch off.
 
 ## Scope
@@ -251,7 +264,8 @@ Deciding details:
 
 ## C5 - Requires and Provides use the perl(MODULE) form
 
-The page words this clause as "应…而不是直接依赖包名" and explains why: the
+The page words this clause as "use the `perl(MODULE)` form rather than
+depending directly on package names" and explains why: the
 package that provides the module satisfies the capability, while a plain
 name dependency breaks when the package is renamed. The same exemptions as
 C4 apply.
@@ -445,7 +459,7 @@ switched off with `--no-check-declarative-stages`.
 
 | Candidate | Corpus count | Why it is rejected |
 | --- | --- | --- |
-| `License` must be exactly `GPL-1.0-or-later OR Artistic-1.0-Perl`. | 62 | The page words the expression as "通常可以" and asks the packager to check the upstream metadata, so 59 of the 62 deviations are a different but correct licence for that module. |
+| `License` must be exactly `GPL-1.0-or-later OR Artistic-1.0-Perl`. | 62 | The page words the expression as "This is usually expressed with" and asks the packager to check the upstream metadata, so 59 of the 62 deviations are a different but correct licence for that module. |
 | A `perl-` named package must declare a Perl build system. | 4 | All four exceptions are legitimate: two autotools modules and two toolchain packages. |
 | A module package must carry `BuildArch: noarch`. | 0 | The field is correct only for a pure Perl module; an XS module is architecture dependent, and the decision needs the source tree. |
 | An XS module must declare `perl-devel`. | 38 by regex | The evidence for an XS module is the presence of a `.xs` file, which is not in the spec, so the regex reports ordinary modules. |
