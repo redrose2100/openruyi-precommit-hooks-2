@@ -99,7 +99,7 @@ Release:        %autorelease
 Summary:        DocBook to LaTeX transform
 License:        GPL-2.0-or-later
 URL:            https://dblatex.sourceforge.net/
-Source0:        https://downloads.sourceforge.net/dblatex/dblatex-%{version}.tar.gz
+Source0:        https://example.org/dblatex-%{version}.tar.gz
 BuildArch:      noarch
 BuildSystem:    pyproject
 
@@ -152,7 +152,7 @@ Release:        %autorelease
 Summary:        Command line tool for Kubernetes
 License:        Apache-2.0
 URL:            https://github.com/kubernetes/kubernetes
-Source0:        https://github.com/kubernetes/kubernetes/archive/v%{version}.tar.gz
+Source0:        https://example.org/kubernetes-%{version}.tar.gz
 BuildSystem:    golang
 
 BuildRequires:  go
@@ -229,14 +229,18 @@ def test_missing_file_is_reported(tmp_path: Path) -> None:
 
 def test_unprefixed_library_name_is_reported(tmp_path: Path) -> None:
     messages = _messages(tmp_path, UNPREFIXED_SPEC)
-    assert any('does not carry the python- prefix' in item for item in messages)
+    assert any(
+        'does not carry the python- prefix' in item for item in messages
+    )
     assert any('python-dblatex' in item for item in messages)
 
 
 def test_unprefixed_library_also_lacks_the_capability(tmp_path: Path) -> None:
     messages = _messages(tmp_path, UNPREFIXED_SPEC)
-    assert any('provides no "python3-" capability' in item
-               for item in messages)
+    assert any(
+        'provides no "python3-" capability' in item
+        for item in messages
+    )
 
 
 def test_unprefixed_tool_name_is_not_reported(tmp_path: Path) -> None:
@@ -305,13 +309,15 @@ def test_unprefixed_name_is_not_asked_for_srcname(tmp_path: Path) -> None:
 # --------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize('spelling', [
-    'PyYAML',
-    'ruamel.yaml',
-    'boolean.py',
-    'aiohttp_socks',
-    'Browser-Use',
-])
+@pytest.mark.parametrize(
+    'spelling', [
+        'PyYAML',
+        'ruamel.yaml',
+        'boolean.py',
+        'aiohttp_socks',
+        'Browser-Use',
+    ],
+)
 def test_non_normalised_srcname_is_reported(
     tmp_path: Path, spelling: str,
 ) -> None:
@@ -326,13 +332,15 @@ def test_non_normalised_srcname_is_reported(
     assert 'not PEP 503 normalised' in messages[0]
 
 
-@pytest.mark.parametrize('spelling', [
-    'requests',
-    'aiohttp-socks',
-    'annotated-types',
-    'ruamel-yaml',
-    'python-dateutil-2',
-])
+@pytest.mark.parametrize(
+    'spelling', [
+        'requests',
+        'aiohttp-socks',
+        'annotated-types',
+        'ruamel-yaml',
+        'python-dateutil-2',
+    ],
+)
 def test_normalised_srcname_passes(tmp_path: Path, spelling: str) -> None:
     content = CLEAN_SPEC.replace(
         '%global srcname requests', f'%global srcname {spelling}',
@@ -389,10 +397,14 @@ def test_missing_python3_provide_is_reported(tmp_path: Path) -> None:
     # capability finding is the one being pinned here.
     content = UNPREFIXED_SPEC
     messages = _messages(tmp_path, content)
-    assert any('provides no "python3-" capability' in item
-               for item in messages), messages
-    assert all('explicit runtime dependency' not in item
-               for item in messages), messages
+    assert any(
+        'provides no "python3-" capability' in item
+        for item in messages
+    ), messages
+    assert all(
+        'explicit runtime dependency' not in item
+        for item in messages
+    ), messages
 
 
 def test_missing_capability_is_reported(tmp_path: Path) -> None:
@@ -401,8 +413,10 @@ def test_missing_capability_is_reported(tmp_path: Path) -> None:
         '%files -f %{pyproject_files}\n%{python3_sitelib}/mkosi',
     )
     messages = _messages(tmp_path, content)
-    assert any('provides no "python3-" capability' in item
-               for item in messages), messages
+    assert any(
+        'provides no "python3-" capability' in item
+        for item in messages
+    ), messages
     assert any('python3-mkosi' in item for item in messages), messages
 
 
@@ -488,13 +502,15 @@ def test_python3_with_a_version_is_reported(tmp_path: Path) -> None:
     assert 'explicit runtime dependency on python3' in message
 
 
-@pytest.mark.parametrize('field', [
-    'Requires:       python3-devel',
-    'Requires:       python3dist(requests)',
-    'Requires:       python3dist(requests) >= 2.0',
-    'Requires:       python(abi) = 3.11',
-    'Requires:       python3-libs',
-])
+@pytest.mark.parametrize(
+    'field', [
+        'Requires:       python3-devel',
+        'Requires:       python3dist(requests)',
+        'Requires:       python3dist(requests) >= 2.0',
+        'Requires:       python(abi) = 3.11',
+        'Requires:       python3-libs',
+    ],
+)
 def test_other_dependency_spellings_pass(tmp_path: Path, field: str) -> None:
     content = TOOL_SPEC.replace(
         '%description\n', f'{field}\n\n%description\n',
@@ -505,7 +521,8 @@ def test_other_dependency_spellings_pass(tmp_path: Path, field: str) -> None:
 def test_rich_dependency_with_python3_passes(tmp_path: Path) -> None:
     content = TOOL_SPEC.replace(
         '%description\n',
-        'Requires:       (python3 >= 3.9 with python3-devel)\n\n%description\n',
+        'Requires:       (python3 >= 3.9 with python3-devel)\n'
+        '\n%description\n',
     )
     assert CHECK(_write(tmp_path, content)) == []
 
@@ -550,7 +567,9 @@ def test_main_returns_one_and_prints_the_findings(
     assert 'provides no "python3-" capability' in out
 
 
-def test_main_renders_the_help_text(capsys: pytest.CaptureFixture[str]) -> None:
+def test_main_renders_the_help_text(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     # A '%' in an argparse help string must be escaped as '%%', otherwise
     # print_help raises TypeError once the user asks for the usage text.
     with pytest.raises(SystemExit):

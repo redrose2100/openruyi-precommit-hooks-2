@@ -449,3 +449,29 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-programming-rust
+  name: Check the Rust language packaging guideline
+  description: >-
+    Enforce the requirements that the Rust language guideline states for a
+    crate provider package, a Rust application and a Python package with a
+    Rust extension. A crate provider must carry the rust- prefix, must
+    keep the provider directory name, the spec file name and Name
+    consistent, must define a pkgname macro that is the part of Name after
+    rust-, must group its version by the compatibility key the page
+    defines, must not use an unnecessarily fine-grained compatibility name,
+    must not declare a crate dependency with an ordinary package name, and
+    must advertise a crate(...) capability from a directory that keeps a
+    Cargo.toml. A crate(...) build dependency must carry a version
+    constraint, and a pyproject Rust extension must declare both rust and
+    rust-rpm-macros. Use --no-check-provider-prefix,
+    --no-check-provider-consistency, --no-check-pkgname,
+    --no-check-compat-group, --no-check-compat-granularity,
+    --no-check-crate-capability, --no-check-crate-version,
+    --no-check-pyproject-toolchain, --no-check-provider-capability and
+    --no-check-provider-cargo-toml to skip the individual checks.
+  entry: check-spec-programming-rust
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true

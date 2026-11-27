@@ -92,7 +92,8 @@ from __future__ import annotations
 
 import argparse
 import re
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
+from collections.abc import Sequence
 from typing import NamedTuple
 
 
@@ -295,7 +296,7 @@ def _expand_text(
     if depth >= _EXPANSIONS:
         return text
 
-    def replace(match: 're.Match[str]') -> str:
+    def replace(match: re.Match[str]) -> str:
         name = match.group(1)
         if name not in macros or name in pending:
             return match.group(0)
@@ -362,7 +363,7 @@ def _analyse(lines: Sequence[str]) -> _Analysis:
 
 
 def _first_field(
-    analysis: _Analysis, pattern: 're.Pattern[str]',
+    analysis: _Analysis, pattern: re.Pattern[str],
 ) -> tuple[str, int] | None:
     """Return ``(value, line)`` of the first field the pattern selects."""
     for block in analysis.blocks:
@@ -373,7 +374,7 @@ def _first_field(
 
 
 def _fields_matching(
-    analysis: _Analysis, pattern: 're.Pattern[str]',
+    analysis: _Analysis, pattern: re.Pattern[str],
 ) -> list[tuple[str, int]]:
     """Return ``(value, line)`` of every field the pattern selects."""
     found: list[tuple[str, int]] = []
