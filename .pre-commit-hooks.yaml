@@ -475,3 +475,29 @@
   types_or: [spec]
   # Only check staged files; skip if nothing changed.
   pass_filenames: true
+
+- id: check-spec-fonts
+  name: Check the font packaging guideline
+  description: >-
+    Enforce the requirements that the font packaging guideline states for a
+    package that ships a system font. A package that ships a font file must
+    carry the fonts- prefix, must not name a licence that forbids
+    redistribution, must install the font into a directory the page
+    documents, must send a console or Web font to its own directory, must
+    match the file extension to the container it is installed into, must
+    convert a *.bdf bitmap font to *.pcf, must gzip a *.pcf bitmap font,
+    and must declare fonts-rpm-macros when it calls a font macro. The
+    %install and %files sections must reach a font directory through the
+    directory macro rather than a hardcoded path, the install macros must
+    only receive the extensions they support, and %font_files must list the
+    extensions the package actually installs. Use --no-check-name-prefix,
+    --no-check-licence, --no-check-install-dir, --no-check-exception-dir,
+    --no-check-extension, --no-check-bdf, --no-check-pcf-gzip,
+    --no-check-macro-requires, --no-check-install-macro,
+    --no-check-files-macro, --no-check-install-font-ext and
+    --no-check-font-files-ext to skip the individual checks.
+  entry: check-spec-fonts
+  language: python
+  types_or: [spec]
+  # Only check staged files; skip if nothing changed.
+  pass_filenames: true
